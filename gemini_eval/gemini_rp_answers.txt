@@ -1,0 +1,46 @@
+# Gemini route_planning answers -- one option letter after each 'ANSWER:'.
+# Order matches the prompts file (sorted by question id).
+# [1/22] id=4962 scene=fb5a96b1a2
+ANSWER: 
+# [2/22] id=4963 scene=1ada7a0617
+ANSWER: 
+# [3/22] id=4966 scene=578511c8a9
+ANSWER: 
+# [4/22] id=4968 scene=3db0a1c8f3
+ANSWER: 
+# [5/22] id=4978 scene=cc5237fd77
+ANSWER: 
+# [6/22] id=4982 scene=d755b3d9d8
+ANSWER: 
+# [7/22] id=4989 scene=9071e139d9
+ANSWER: 
+# [8/22] id=4995 scene=6115eddb86
+ANSWER: 
+# [9/22] id=5017 scene=a8bf42d646
+ANSWER: 
+# [10/22] id=5020 scene=21d970d8de
+ANSWER: 
+# [11/22] id=5022 scene=bde1e479ad
+ANSWER: 
+# [12/22] id=5028 scene=c5439f4607
+ANSWER: 
+# [13/22] id=5050 scene=ac48a9b736
+ANSWER: 
+# [14/22] id=5052 scene=286b55a2bf
+ANSWER: 
+# [15/22] id=5062 scene=7b6477cb95
+ANSWER: 
+# [16/22] id=5074 scene=825d228aec
+ANSWER: 
+# [17/22] id=5083 scene=f3685d06a9
+ANSWER: 
+# [18/22] id=5095 scene=3f15a9266d
+ANSWER: 
+# [19/22] id=5104 scene=acd95847c5
+ANSWER: 
+# [20/22] id=5110 scene=5f99900f09
+ANSWER: 
+# [21/22] id=5120 scene=a24f64f7fb
+ANSWER: 
+# [22/22] id=5124 scene=5eb31827b7
+ANSWER: 

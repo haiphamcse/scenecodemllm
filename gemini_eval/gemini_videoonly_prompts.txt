@@ -1,0 +1,941 @@
+===== [1/49] scene=7b6477cb95  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/7b6477cb95.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2426] (option letter):
+If I am standing by the telephone and facing the cup, is the trash can to the left or the right of the cup?
+Options:
+A. left
+B. right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1506] (option letter):
+If I am standing by the power strip and facing the telephone, is the door to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. right
+C. left
+Answer with the option's letter from the given choices directly.
+
+===== [2/49] scene=c50d2d1d42  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/c50d2d1d42.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2430] (option letter):
+If I am standing by the door and facing the telephone, is the whiteboard to the left or the right of the telephone?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1607] (number):
+Measuring from the closest point of each object, what is the distance between the coat rack and the whiteboard (in meters)?
+Please answer the question using a single word or phrase.
+
+===== [3/49] scene=cc5237fd77  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/cc5237fd77.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2432] (option letter):
+If I am standing by the laptop and facing the keyboard, is the ceiling light to the left or the right of the keyboard?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1818] (option letter):
+If I am standing by the suitcase and facing the ceiling light, is the keyboard to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-left
+B. front-right
+C. back-right
+D. front-left
+Answer with the option's letter from the given choices directly.
+
+===== [4/49] scene=5eb31827b7  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/5eb31827b7.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2437] (option letter):
+If I am standing by the bookshelf and facing the keyboard, is the heater to the left or the right of the keyboard?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2530] (number):
+How many trash can(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [5/49] scene=e398684d27  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/e398684d27.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2454] (option letter):
+If I am standing by the ceiling light and facing the monitor, is the door to the left or the right of the monitor?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1560] (option letter):
+If I am standing by the door and facing the ceiling light, is the monitor to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. right
+C. left
+Answer with the option's letter from the given choices directly.
+
+===== [6/49] scene=45b0dac5e3  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/45b0dac5e3.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2458] (option letter):
+If I am standing by the door and facing the cup, is the toilet to the left or the right of the cup?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1859] (option letter):
+If I am standing by the ceiling light and facing the cup, is the door to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-left
+B. back-right
+C. front-right
+D. front-left
+Answer with the option's letter from the given choices directly.
+
+===== [7/49] scene=f2dc06b1d2  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/f2dc06b1d2.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2465] (option letter):
+If I am standing by the door and facing the chair, is the table to the left or the right of the chair?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1575] (option letter):
+If I am standing by the chair and facing the table, is the door to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. left
+B. back
+C. right
+Answer with the option's letter from the given choices directly.
+
+===== [8/49] scene=5942004064  (3 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/5942004064.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2467] (option letter):
+If I am standing by the toilet and facing the tv, is the chair to the left or the right of the tv?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2716] (option letter):
+What will be the first-time appearance order of the following categories in the video: toilet, bed, basket, table?
+Options:
+A. basket, table, bed, toilet
+B. toilet, basket, bed, table
+C. toilet, bed, basket, table
+D. toilet, basket, table, bed
+Answer with the option's letter from the given choices directly.
+
+Q3 [id=2743] (option letter):
+What will be the first-time appearance order of the following categories in the video: door, table, pillow, basket?
+Options:
+A. table, basket, pillow, door
+B. door, table, pillow, basket
+C. door, basket, pillow, table
+D. pillow, door, table, basket
+Answer with the option's letter from the given choices directly.
+
+===== [9/49] scene=bcd2436daf  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/bcd2436daf.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2470] (option letter):
+If I am standing by the heater and facing the ceiling light, is the pillow to the left or the right of the ceiling light?
+Options:
+A. right
+B. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1582] (option letter):
+If I am standing by the chair and facing the pillow, is the ceiling light to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. left
+C. right
+Answer with the option's letter from the given choices directly.
+
+===== [10/49] scene=09c1414f1b  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/09c1414f1b.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2479] (option letter):
+If I am standing by the kettle and facing the shoe rack, is the microwave to the left or the right of the shoe rack?
+Options:
+A. left
+B. right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2871] (option letter):
+What will be the first-time appearance order of the following categories in the video: blanket, trash can, microwave, plant?
+Options:
+A. microwave, blanket, plant, trash can
+B. plant, blanket, microwave, trash can
+C. plant, blanket, trash can, microwave
+D. blanket, trash can, microwave, plant
+Answer with the option's letter from the given choices directly.
+
+===== [11/49] scene=1ada7a0617  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/1ada7a0617.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1529] (option letter):
+If I am standing by the computer tower and facing the heater, is the door to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. right
+C. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1834] (option letter):
+If I am standing by the computer tower and facing the heater, is the door to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-left
+B. back-right
+C. front-left
+D. front-right
+Answer with the option's letter from the given choices directly.
+
+===== [12/49] scene=40aec5fffa  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/40aec5fffa.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1555] (option letter):
+If I am standing by the refrigerator and facing the heater, is the microwave to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. right
+C. left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2682] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [13/49] scene=286b55a2bf  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/286b55a2bf.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1569] (option letter):
+If I am standing by the exhaust fan and facing the door, is the toilet to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. back
+B. left
+C. right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1867] (option letter):
+If I am standing by the ceiling light and facing the toilet, is the cup to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. front-right
+B. back-left
+C. front-left
+D. back-right
+Answer with the option's letter from the given choices directly.
+
+===== [14/49] scene=3db0a1c8f3  (3 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/3db0a1c8f3.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1586] (option letter):
+If I am standing by the refrigerator and facing the kettle, is the sofa to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. right
+B. left
+C. back
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=4968] (option letter):
+You are a robot beginning at the toilet and facing the washing machine. You want to navigate to the pan. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. Go forward until the washing machine 2. [please fill in] 3. Go forward until the sofa 4. [please fill in] 5. Go forward until the pan. You have reached the final destination.
+Options:
+A. Turn Left, Turn Left
+B. Turn Left, Turn Right
+C. Turn Back, Turn Right
+D. Turn Right, Turn Right
+Answer with the option's letter from the given choices directly.
+
+Q3 [id=2806] (option letter):
+What will be the first-time appearance order of the following categories in the video: basket, printer, heater, tv?
+Options:
+A. heater, basket, tv, printer
+B. basket, printer, heater, tv
+C. tv, printer, heater, basket
+D. basket, tv, heater, printer
+Answer with the option's letter from the given choices directly.
+
+===== [15/49] scene=d755b3d9d8  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/d755b3d9d8.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1588] (option letter):
+If I am standing by the door and facing the cup, is the whiteboard to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. left
+B. back
+C. right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2845] (option letter):
+What will be the first-time appearance order of the following categories in the video: monitor, laptop, printer, keyboard?
+Options:
+A. laptop, monitor, printer, keyboard
+B. monitor, keyboard, laptop, printer
+C. printer, monitor, keyboard, laptop
+D. monitor, laptop, printer, keyboard
+Answer with the option's letter from the given choices directly.
+
+===== [16/49] scene=c49a8c6cff  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/c49a8c6cff.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1595] (option letter):
+If I am standing by the chair and facing the heater, is the ceiling light to my left, right, or back?
+An object is to my back if I would have to turn at least 135 degrees in order to face it.
+Options:
+A. left
+B. back
+C. right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1802] (number):
+Measuring from the closest point of each object, what is the distance between the trash can and the bed (in meters)?
+Please answer the question using a single word or phrase.
+
+===== [17/49] scene=fb5a96b1a2  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/fb5a96b1a2.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1830] (option letter):
+If I am standing by the sofa and facing the computer mouse, is the power strip to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-left
+B. front-left
+C. back-right
+D. front-right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=4962] (option letter):
+You are a robot beginning at the doorframe facing the table. You want to navigate to the bookshelf. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. Go forward until the table 2. [please fill in] 3. Go forward until the chair beside the screen 4. [please fill in] 5. Go forward until the bookshelf. You have reached the final destination.
+Options:
+A. Turn Left, Turn Right
+B. Turn Right, Turn Right
+C. Turn Back, Turn Left
+D. Turn Back, Turn Right
+Answer with the option's letter from the given choices directly.
+
+===== [18/49] scene=3f15a9266d  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/3f15a9266d.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1844] (option letter):
+If I am standing by the exhaust fan and facing the door, is the computer mouse to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-left
+B. front-left
+C. back-right
+D. front-right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2237] (number):
+What is the length of the longest dimension (length, width, or height) of the exhaust fan, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [19/49] scene=f9f95681fd  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/f9f95681fd.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1849] (option letter):
+If I am standing by the ceiling light and facing the kettle, is the door to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-right
+B. back-left
+C. front-right
+D. front-left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1671] (number):
+Measuring from the closest point of each object, what is the distance between the refrigerator and the ceiling light (in meters)?
+Please answer the question using a single word or phrase.
+
+===== [20/49] scene=3864514494  (3 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/3864514494.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1853] (option letter):
+If I am standing by the microwave and facing the heater, is the door to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. front-right
+B. front-left
+C. back-right
+D. back-left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=1679] (number):
+Measuring from the closest point of each object, what is the distance between the door and the heater (in meters)?
+Please answer the question using a single word or phrase.
+
+Q3 [id=2681] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [21/49] scene=25f3b7a318  (3 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/25f3b7a318.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1880] (option letter):
+If I am standing by the blanket and facing the laptop, is the toilet to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. front-left
+B. back-right
+C. back-left
+D. front-right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2755] (option letter):
+What will be the first-time appearance order of the following categories in the video: laptop, basket, blanket, door?
+Options:
+A. laptop, door, blanket, basket
+B. door, laptop, basket, blanket
+C. laptop, basket, blanket, door
+D. blanket, door, laptop, basket
+Answer with the option's letter from the given choices directly.
+
+Q3 [id=2768] (option letter):
+What will be the first-time appearance order of the following categories in the video: laptop, shoe rack, basket, bed?
+Options:
+A. basket, shoe rack, bed, laptop
+B. bed, shoe rack, laptop, basket
+C. bed, basket, laptop, shoe rack
+D. laptop, shoe rack, basket, bed
+Answer with the option's letter from the given choices directly.
+
+===== [22/49] scene=6115eddb86  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/6115eddb86.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1901] (option letter):
+If I am standing by the tv and facing the chair, is the toilet to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-right
+B. front-left
+C. front-right
+D. back-left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2398] (number):
+What is the length of the longest dimension (length, width, or height) of the table lamp, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [23/49] scene=acd95847c5  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/acd95847c5.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1938] (option letter):
+Measuring from the closest point of each object, which of these objects (laptop, power strip, computer tower, heater) is the closest to the door?
+Options:
+A. laptop
+B. power strip
+C. computer tower
+D. heater
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2511] (number):
+How many monitor(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [24/49] scene=3e8bba0176  (1 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/3e8bba0176.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1969] (option letter):
+Measuring from the closest point of each object, which of these objects (ceiling light, chair, table, paper bag) is the closest to the door?
+Options:
+A. ceiling light
+B. chair
+C. table
+D. paper bag
+Answer with the option's letter from the given choices directly.
+
+===== [25/49] scene=21d970d8de  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/21d970d8de.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1987] (option letter):
+Measuring from the closest point of each object, which of these objects (chair, tv, whiteboard, ceiling light) is the closest to the door?
+Options:
+A. chair
+B. tv
+C. whiteboard
+D. ceiling light
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2673] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [26/49] scene=bde1e479ad  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/bde1e479ad.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1994] (option letter):
+Measuring from the closest point of each object, which of these objects (door, chair, whiteboard, ceiling light) is the closest to the clock?
+Options:
+A. door
+B. chair
+C. whiteboard
+D. ceiling light
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2677] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [27/49] scene=f3d64c30f8  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/f3d64c30f8.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2066] (option letter):
+Measuring from the closest point of each object, which of these objects (cup, plant, table, bookshelf) is the closest to the clock?
+Options:
+A. cup
+B. plant
+C. table
+D. bookshelf
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2596] (number):
+How many chair(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [28/49] scene=0d2ee665be  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/0d2ee665be.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2075] (option letter):
+Measuring from the closest point of each object, which of these objects (microwave, keyboard, trash can, computer mouse) is the closest to the cutting board?
+Options:
+A. microwave
+B. keyboard
+C. trash can
+D. computer mouse
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2769] (option letter):
+What will be the first-time appearance order of the following categories in the video: chair, bed, microwave, pan?
+Options:
+A. chair, bed, pan, microwave
+B. chair, bed, microwave, pan
+C. chair, microwave, bed, pan
+D. microwave, pan, chair, bed
+Answer with the option's letter from the given choices directly.
+
+===== [29/49] scene=ac48a9b736  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/ac48a9b736.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2104] (option letter):
+Measuring from the closest point of each object, which of these objects (table, whiteboard, chair, computer mouse) is the closest to the trash can?
+Options:
+A. table
+B. whiteboard
+C. chair
+D. computer mouse
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=5050] (option letter):
+You are a robot beginning at the brown door between two black chairs and facing the door. You want to navigate to the robot arm. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the chair without a table nearby 3. [please fill in] 4. Go forward until the robot arm. You have reached the final destination.
+Options:
+A. Turn Back, Turn Left
+B. Turn Right, Turn Right
+C. Turn Left, Turn Right
+D. Turn Back, Turn Right
+Answer with the option's letter from the given choices directly.
+
+===== [30/49] scene=5f99900f09  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/5f99900f09.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2156] (option letter):
+Measuring from the closest point of each object, which of these objects (suitcase, table, monitor, ceiling light) is the closest to the refrigerator?
+Options:
+A. suitcase
+B. table
+C. monitor
+D. ceiling light
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=5110] (option letter):
+You are a robot beginning at the refrigerator and facing the refrigerator. You want to navigate to the recycling bin. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the suitcase 3. [please fill in] 4. Go forward until the printer 5. [please fill in] 6. Go forward until the recycling bin. You have reached the final destination.
+Options:
+A. Turn Left, Turn Left, Turn Right
+B. Turn Right, Turn Left, Turn Right
+C. Turn Left, Turn Right, Turn Right
+D. Turn Left, Turn Left, Turn Left
+Answer with the option's letter from the given choices directly.
+
+===== [31/49] scene=9071e139d9  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/9071e139d9.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2158] (option letter):
+Measuring from the closest point of each object, which of these objects (chair, sofa, table, clock) is the closest to the door?
+Options:
+A. chair
+B. sofa
+C. table
+D. clock
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2709] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [32/49] scene=27dd4da69e  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/27dd4da69e.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2167] (option letter):
+Measuring from the closest point of each object, which of these objects (laptop, telephone, trash can, suitcase) is the closest to the cutting board?
+Options:
+A. laptop
+B. telephone
+C. trash can
+D. suitcase
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2936] (option letter):
+What will be the first-time appearance order of the following categories in the video: cutting board, door, crate, kettle?
+Options:
+A. cutting board, crate, door, kettle
+B. door, crate, cutting board, kettle
+C. cutting board, door, crate, kettle
+D. cutting board, kettle, crate, door
+Answer with the option's letter from the given choices directly.
+
+===== [33/49] scene=578511c8a9  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/578511c8a9.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=4966] (option letter):
+You are a robot beginning at the blue chair and facing the fan beside the boxes. You want to navigate to the trash bin. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. Go forward until passing the tables on the right. 2. [please fill in] 3. Go forward until the trash bin. You have reached the final destination.
+Options:
+A. Turn Left
+B. Turn Back
+C. Turn Right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2821] (option letter):
+What will be the first-time appearance order of the following categories in the video: computer mouse, printer, monitor, exhaust fan?
+Options:
+A. exhaust fan, printer, monitor, computer mouse
+B. exhaust fan, monitor, computer mouse, printer
+C. printer, monitor, exhaust fan, computer mouse
+D. computer mouse, printer, monitor, exhaust fan
+Answer with the option's letter from the given choices directly.
+
+===== [34/49] scene=a8bf42d646  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/a8bf42d646.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=5017] (option letter):
+You are a robot beginning at the door with the clock above it and facing the door. You want to navigate to the blue machine. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the blue machine. You have reached the final destination.
+Options:
+A. Turn Left
+B. Turn Right
+C. Turn Back
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2276] (number):
+What is the length of the longest dimension (length, width, or height) of the heater, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [35/49] scene=c5439f4607  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/c5439f4607.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=5028] (option letter):
+You are a robot beginning at the computer and facing the computer. You want to navigate to the first aid cabinet. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the first aid cabinet. You have reached the final destination.
+Options:
+A. Turn Right
+B. Turn Back
+C. Turn Left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2617] (number):
+How many exhaust fan(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [36/49] scene=825d228aec  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/825d228aec.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=5074] (option letter):
+You are a robot beginning at the printer and facing the plugin. You want to navigate to the trash can. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the wall. 3. [please fill in] 4. Go forward until the trash can. You have reached the final destination.
+Options:
+A. Turn Right, Turn Right
+B. Turn Back, Turn Right
+C. Turn Right, Turn Left
+D. Turn Back, Turn Left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2585] (number):
+How many exhaust fan(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [37/49] scene=f3685d06a9  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/f3685d06a9.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=5083] (option letter):
+You are a robot beginning at the mirror facing the mirror. You want to navigate to the the toilet closest to the entrance door. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the entrance door 3. [please fill in] 4. Go forward until the toilet. You have reached the final destination.
+Options:
+A. Turn Left, Turn Left
+B. Turn Left, Turn Right
+C. Turn Back, Turn Right
+D. Turn Right, Turn Right
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2691] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [38/49] scene=a24f64f7fb  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/a24f64f7fb.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=5120] (option letter):
+You are a robot beginning at the chair and facing the monitor. You want to navigate to the closet. You will perform the following actions (Note: for each [please fill in], choose either 'turn back,' 'turn left,' or 'turn right.'): 1. [please fill in] 2. Go forward until the red curtain 3. [please fill in] 4. Go forward until the closet. You have reached the final destination.
+Options:
+A. Turn Right, Turn Right
+B. Turn Back, Turn Left
+C. Turn Left, Turn Left
+D. Turn Right, Turn Left
+Answer with the option's letter from the given choices directly.
+
+Q2 [id=2221] (number):
+What is the length of the longest dimension (length, width, or height) of the ceiling light, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [39/49] scene=38d58a7a31  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/38d58a7a31.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1659] (number):
+Measuring from the closest point of each object, what is the distance between the telephone and the trash can (in meters)?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2567] (number):
+How many heater(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [40/49] scene=5ee7c22ba0  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/5ee7c22ba0.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1665] (number):
+Measuring from the closest point of each object, what is the distance between the table and the refrigerator (in meters)?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2257] (number):
+What is the length of the longest dimension (length, width, or height) of the ceiling light, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [41/49] scene=13c3e046d7  (1 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/13c3e046d7.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1686] (number):
+Measuring from the closest point of each object, what is the distance between the heater and the door (in meters)?
+Please answer the question using a single word or phrase.
+
+===== [42/49] scene=7bc286c1b6  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/7bc286c1b6.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1707] (number):
+Measuring from the closest point of each object, what is the distance between the toilet and the door (in meters)?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2690] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [43/49] scene=b0a08200c9  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/b0a08200c9.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1708] (number):
+Measuring from the closest point of each object, what is the distance between the door and the chair (in meters)?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2692] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [44/49] scene=a980334473  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/a980334473.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=1715] (number):
+Measuring from the closest point of each object, what is the distance between the door and the chair (in meters)?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2301] (number):
+What is the length of the longest dimension (length, width, or height) of the ceiling light, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [45/49] scene=5748ce6f01  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/5748ce6f01.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2549] (number):
+How many chair(s) are in this room?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2245] (number):
+What is the length of the longest dimension (length, width, or height) of the table, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [46/49] scene=c4c04e6d6c  (3 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/c4c04e6d6c.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2552] (number):
+How many chair(s) are in this room?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2246] (number):
+What is the length of the longest dimension (length, width, or height) of the telephone, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+Q3 [id=2675] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.
+
+===== [47/49] scene=7831862f02  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/7831862f02.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2553] (number):
+How many door(s) are in this room?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2247] (number):
+What is the length of the longest dimension (length, width, or height) of the sofa, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+===== [48/49] scene=99fa5c25e1  (1 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/99fa5c25e1.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2635] (number):
+How many bucket(s) are in this room?
+Please answer the question using a single word or phrase.
+
+===== [49/49] scene=31a2c91c43  (2 questions) =====
+UPLOAD VIDEO: /scratch/ducpham/Working/dataset/vsib/vsibench/scannetpp/31a2c91c43.mp4
+
+You are a spatial-reasoning assistant. You are given a video walkthrough of a room. Use the video to answer the questions.
+
+Q1 [id=2283] (number):
+What is the length of the longest dimension (length, width, or height) of the ceiling light, measured in centimeters?
+Please answer the question using a single word or phrase.
+
+Q2 [id=2687] (number):
+What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.

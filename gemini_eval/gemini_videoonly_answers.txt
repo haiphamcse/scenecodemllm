@@ -1,0 +1,251 @@
+# VSI-Bench video answers -- one answer after each 'ANSWER:'.
+# Order matches the prompts file (grouped by scene).
+# --- [1/49] scene=7b6477cb95
+#   Q1 id=2426 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1506 object_rel_direction_medium (option letter)
+ANSWER: A
+# --- [2/49] scene=c50d2d1d42
+#   Q1 id=2430 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1607 object_abs_distance (number)
+ANSWER: 0.35
+# --- [3/49] scene=cc5237fd77
+#   Q1 id=2432 object_rel_direction_easy (option letter)
+ANSWER: A
+#   Q2 id=1818 object_rel_direction_hard (option letter)
+ANSWER: B
+# --- [4/49] scene=5eb31827b7
+#   Q1 id=2437 object_rel_direction_easy (option letter)
+ANSWER: A
+#   Q2 id=2530 object_counting (number)
+ANSWER: 4
+# --- [5/49] scene=e398684d27
+#   Q1 id=2454 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1560 object_rel_direction_medium (option letter)
+ANSWER: B
+# --- [6/49] scene=45b0dac5e3
+#   Q1 id=2458 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1859 object_rel_direction_hard (option letter)
+ANSWER: B
+# --- [7/49] scene=f2dc06b1d2
+#   Q1 id=2465 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1575 object_rel_direction_medium (option letter)
+ANSWER: A
+# --- [8/49] scene=5942004064
+#   Q1 id=2467 object_rel_direction_easy (option letter)
+ANSWER: A
+#   Q2 id=2716 obj_appearance_order (option letter)
+ANSWER: D
+#   Q3 id=2743 obj_appearance_order (option letter)
+ANSWER: C
+# --- [9/49] scene=bcd2436daf
+#   Q1 id=2470 object_rel_direction_easy (option letter)
+ANSWER: B
+#   Q2 id=1582 object_rel_direction_medium (option letter)
+ANSWER: C
+# --- [10/49] scene=09c1414f1b
+#   Q1 id=2479 object_rel_direction_easy (option letter)
+ANSWER: A
+#   Q2 id=2871 obj_appearance_order (option letter)
+ANSWER: C
+# --- [11/49] scene=1ada7a0617
+#   Q1 id=1529 object_rel_direction_medium (option letter)
+ANSWER: A
+#   Q2 id=1834 object_rel_direction_hard (option letter)
+ANSWER: B
+# --- [12/49] scene=40aec5fffa
+#   Q1 id=1555 object_rel_direction_medium (option letter)
+ANSWER: A
+#   Q2 id=2682 room_size_estimation (number)
+ANSWER: 10
+# --- [13/49] scene=286b55a2bf
+#   Q1 id=1569 object_rel_direction_medium (option letter)
+ANSWER: A
+#   Q2 id=1867 object_rel_direction_hard (option letter)
+ANSWER: A
+# --- [14/49] scene=3db0a1c8f3
+#   Q1 id=1586 object_rel_direction_medium (option letter)
+ANSWER: B
+#   Q2 id=4968 route_planning (option letter)
+ANSWER: D
+#   Q3 id=2806 obj_appearance_order (option letter)
+ANSWER: D
+# --- [15/49] scene=d755b3d9d8
+#   Q1 id=1588 object_rel_direction_medium (option letter)
+ANSWER: C
+#   Q2 id=2845 obj_appearance_order (option letter)
+ANSWER: B
+# --- [16/49] scene=c49a8c6cff
+#   Q1 id=1595 object_rel_direction_medium (option letter)
+ANSWER: B
+#   Q2 id=1802 object_abs_distance (number)
+ANSWER: 0.47
+# --- [17/49] scene=fb5a96b1a2
+#   Q1 id=1830 object_rel_direction_hard (option letter)
+ANSWER: C
+#   Q2 id=4962 route_planning (option letter)
+ANSWER: A
+# --- [18/49] scene=3f15a9266d
+#   Q1 id=1844 object_rel_direction_hard (option letter)
+ANSWER: C
+#   Q2 id=2237 object_size_estimation (number)
+ANSWER: 66
+# --- [19/49] scene=f9f95681fd
+#   Q1 id=1849 object_rel_direction_hard (option letter)
+ANSWER: A
+#   Q2 id=1671 object_abs_distance (number)
+ANSWER: 1.1
+# --- [20/49] scene=3864514494
+#   Q1 id=1853 object_rel_direction_hard (option letter)
+ANSWER: C
+#   Q2 id=1679 object_abs_distance (number)
+ANSWER: 4.2
+#   Q3 id=2681 room_size_estimation (number)
+ANSWER: 9
+# --- [21/49] scene=25f3b7a318
+#   Q1 id=1880 object_rel_direction_hard (option letter)
+ANSWER: C
+#   Q2 id=2755 obj_appearance_order (option letter)
+ANSWER: D
+#   Q3 id=2768 obj_appearance_order (option letter)
+ANSWER: B
+# --- [22/49] scene=6115eddb86
+#   Q1 id=1901 object_rel_direction_hard (option letter)
+ANSWER: A
+#   Q2 id=2398 object_size_estimation (number)
+ANSWER: 55
+# --- [23/49] scene=acd95847c5
+#   Q1 id=1938 object_rel_distance (option letter)
+ANSWER: C
+#   Q2 id=2511 object_counting (number)
+ANSWER: 4
+# --- [24/49] scene=3e8bba0176
+#   Q1 id=1969 object_rel_distance (option letter)
+ANSWER: B
+# --- [25/49] scene=21d970d8de
+#   Q1 id=1987 object_rel_distance (option letter)
+ANSWER: C
+#   Q2 id=2673 room_size_estimation (number)
+ANSWER: 60
+# --- [26/49] scene=bde1e479ad
+#   Q1 id=1994 object_rel_distance (option letter)
+ANSWER: C
+#   Q2 id=2677 room_size_estimation (number)
+ANSWER: 60
+# --- [27/49] scene=f3d64c30f8
+#   Q1 id=2066 object_rel_distance (option letter)
+ANSWER: C
+#   Q2 id=2596 object_counting (number)
+ANSWER: 17
+# --- [28/49] scene=0d2ee665be
+#   Q1 id=2075 object_rel_distance (option letter)
+ANSWER: A
+#   Q2 id=2769 obj_appearance_order (option letter)
+ANSWER: B
+# --- [29/49] scene=ac48a9b736
+#   Q1 id=2104 object_rel_distance (option letter)
+ANSWER: A
+#   Q2 id=5050 route_planning (option letter)
+ANSWER: D
+# --- [30/49] scene=5f99900f09
+#   Q1 id=2156 object_rel_distance (option letter)
+ANSWER: B
+#   Q2 id=5110 route_planning (option letter)
+ANSWER: A
+# --- [31/49] scene=9071e139d9
+#   Q1 id=2158 object_rel_distance (option letter)
+ANSWER: B
+#   Q2 id=2709 room_size_estimation (number)
+ANSWER: 60
+# --- [32/49] scene=27dd4da69e
+#   Q1 id=2167 object_rel_distance (option letter)
+ANSWER: C
+#   Q2 id=2936 obj_appearance_order (option letter)
+ANSWER: A
+# --- [33/49] scene=578511c8a9
+#   Q1 id=4966 route_planning (option letter)
+ANSWER: A
+#   Q2 id=2821 obj_appearance_order (option letter)
+ANSWER: B
+# --- [34/49] scene=a8bf42d646
+#   Q1 id=5017 route_planning (option letter)
+ANSWER: B
+#   Q2 id=2276 object_size_estimation (number)
+ANSWER: 180
+# --- [35/49] scene=c5439f4607
+#   Q1 id=5028 route_planning (option letter)
+ANSWER: C
+#   Q2 id=2617 object_counting (number)
+ANSWER: 1
+# --- [36/49] scene=825d228aec
+#   Q1 id=5074 route_planning (option letter)
+ANSWER: A
+#   Q2 id=2585 object_counting (number)
+ANSWER: 2
+# --- [37/49] scene=f3685d06a9
+#   Q1 id=5083 route_planning (option letter)
+ANSWER: B
+#   Q2 id=2691 room_size_estimation (number)
+ANSWER: 6
+# --- [38/49] scene=a24f64f7fb
+#   Q1 id=5120 route_planning (option letter)
+ANSWER: A
+#   Q2 id=2221 object_size_estimation (number)
+ANSWER: 40
+# --- [39/49] scene=38d58a7a31
+#   Q1 id=1659 object_abs_distance (number)
+ANSWER: 17.5
+#   Q2 id=2567 object_counting (number)
+ANSWER: 1
+# --- [40/49] scene=5ee7c22ba0
+#   Q1 id=1665 object_abs_distance (number)
+ANSWER: 1.5
+#   Q2 id=2257 object_size_estimation (number)
+ANSWER: 120
+# --- [41/49] scene=13c3e046d7
+#   Q1 id=1686 object_abs_distance (number)
+ANSWER: 2.5
+# --- [42/49] scene=7bc286c1b6
+#   Q1 id=1707 object_abs_distance (number)
+ANSWER: 1.5
+#   Q2 id=2690 room_size_estimation (number)
+ANSWER: 5
+# --- [43/49] scene=b0a08200c9
+#   Q1 id=1708 object_abs_distance (number)
+ANSWER: 2
+#   Q2 id=2692 room_size_estimation (number)
+ANSWER: 12
+# --- [44/49] scene=a980334473
+#   Q1 id=1715 object_abs_distance (number)
+ANSWER: 1
+#   Q2 id=2301 object_size_estimation (number)
+ANSWER: 120
+# --- [45/49] scene=5748ce6f01
+#   Q1 id=2549 object_counting (number)
+ANSWER: 6
+#   Q2 id=2245 object_size_estimation (number)
+ANSWER: 180
+# --- [46/49] scene=c4c04e6d6c
+#   Q1 id=2552 object_counting (number)
+ANSWER: 38
+#   Q2 id=2246 object_size_estimation (number)
+ANSWER: 20
+#   Q3 id=2675 room_size_estimation (number)
+ANSWER: 80
+# --- [47/49] scene=7831862f02
+#   Q1 id=2553 object_counting (number)
+ANSWER: 0
+#   Q2 id=2247 object_size_estimation (number)
+ANSWER: 200
+# --- [48/49] scene=99fa5c25e1
+#   Q1 id=2635 object_counting (number)
+ANSWER: 2
+# --- [49/49] scene=31a2c91c43
+#   Q1 id=2283 object_size_estimation (number)
+ANSWER: 20
+#   Q2 id=2687 room_size_estimation (number)
+ANSWER: 5

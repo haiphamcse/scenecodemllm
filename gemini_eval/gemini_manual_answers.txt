@@ -1,0 +1,202 @@
+# VSI-Bench subsample answers -- one answer after each 'ANSWER:'.
+# Order matches the prompts file.
+# [1/100] id=2426 type=object_rel_direction_easy scene=7b6477cb95  (option letter)
+ANSWER: B
+# [2/100] id=2430 type=object_rel_direction_easy scene=c50d2d1d42  (option letter)
+ANSWER: B
+# [3/100] id=2432 type=object_rel_direction_easy scene=cc5237fd77  (option letter)
+ANSWER: B
+# [4/100] id=2437 type=object_rel_direction_easy scene=5eb31827b7  (option letter)
+ANSWER: B
+# [5/100] id=2454 type=object_rel_direction_easy scene=e398684d27  (option letter)
+ANSWER: B
+# [6/100] id=2458 type=object_rel_direction_easy scene=45b0dac5e3  (option letter)
+ANSWER: B
+# [7/100] id=2465 type=object_rel_direction_easy scene=f2dc06b1d2  (option letter)
+ANSWER: A
+# [8/100] id=2467 type=object_rel_direction_easy scene=5942004064  (option letter)
+ANSWER: A
+# [9/100] id=2470 type=object_rel_direction_easy scene=bcd2436daf  (option letter)
+ANSWER: B
+# [10/100] id=2479 type=object_rel_direction_easy scene=09c1414f1b  (option letter)
+ANSWER: B
+# [11/100] id=1506 type=object_rel_direction_medium scene=7b6477cb95  (option letter)
+ANSWER: A
+# [12/100] id=1529 type=object_rel_direction_medium scene=1ada7a0617  (option letter)
+ANSWER: A 
+# [13/100] id=1555 type=object_rel_direction_medium scene=40aec5fffa  (option letter)
+ANSWER: A
+# [14/100] id=1560 type=object_rel_direction_medium scene=e398684d27  (option letter)
+ANSWER: C
+# [15/100] id=1569 type=object_rel_direction_medium scene=286b55a2bf  (option letter)
+ANSWER: A
+# [16/100] id=1575 type=object_rel_direction_medium scene=f2dc06b1d2  (option letter)
+ANSWER: C
+# [17/100] id=1582 type=object_rel_direction_medium scene=bcd2436daf  (option letter)
+ANSWER: C
+# [18/100] id=1586 type=object_rel_direction_medium scene=3db0a1c8f3  (option letter)
+ANSWER: C
+# [19/100] id=1588 type=object_rel_direction_medium scene=d755b3d9d8  (option letter)
+ANSWER: A
+# [20/100] id=1595 type=object_rel_direction_medium scene=c49a8c6cff  (option letter)
+ANSWER: A 
+# [21/100] id=1818 type=object_rel_direction_hard scene=cc5237fd77  (option letter)
+ANSWER: D
+# [22/100] id=1830 type=object_rel_direction_hard scene=fb5a96b1a2  (option letter)
+ANSWER: A
+# [23/100] id=1834 type=object_rel_direction_hard scene=1ada7a0617  (option letter)
+ANSWER: A
+# [24/100] id=1844 type=object_rel_direction_hard scene=3f15a9266d  (option letter)
+ANSWER: A
+# [25/100] id=1849 type=object_rel_direction_hard scene=f9f95681fd  (option letter)
+ANSWER: A
+# [26/100] id=1853 type=object_rel_direction_hard scene=3864514494  (option letter)
+ANSWER: C
+# [27/100] id=1859 type=object_rel_direction_hard scene=45b0dac5e3  (option letter)
+ANSWER: B
+# [28/100] id=1867 type=object_rel_direction_hard scene=286b55a2bf  (option letter)
+ANSWER: A
+# [29/100] id=1880 type=object_rel_direction_hard scene=25f3b7a318  (option letter)
+ANSWER: C
+# [30/100] id=1901 type=object_rel_direction_hard scene=6115eddb86  (option letter)
+ANSWER: A
+# [31/100] id=1938 type=object_rel_distance scene=acd95847c5  (option letter)
+ANSWER: B
+# [32/100] id=1969 type=object_rel_distance scene=3e8bba0176  (option letter)
+ANSWER: B
+# [33/100] id=1987 type=object_rel_distance scene=21d970d8de  (option letter)
+ANSWER: C
+# [34/100] id=1994 type=object_rel_distance scene=bde1e479ad  (option letter)
+ANSWER: C
+# [35/100] id=2066 type=object_rel_distance scene=f3d64c30f8  (option letter)
+ANSWER: C
+# [36/100] id=2075 type=object_rel_distance scene=0d2ee665be  (option letter)
+ANSWER: A
+# [37/100] id=2104 type=object_rel_distance scene=ac48a9b736  (option letter)
+ANSWER: A
+# [38/100] id=2156 type=object_rel_distance scene=5f99900f09  (option letter)
+ANSWER: D
+# [39/100] id=2158 type=object_rel_distance scene=9071e139d9  (option letter)
+ANSWER: B
+# [40/100] id=2167 type=object_rel_distance scene=27dd4da69e  (option letter)
+ANSWER: B
+# [41/100] id=4962 type=route_planning scene=fb5a96b1a2  (option letter)
+ANSWER: A
+# [42/100] id=4966 type=route_planning scene=578511c8a9  (option letter)
+ANSWER: A
+# [43/100] id=4968 type=route_planning scene=3db0a1c8f3  (option letter)
+ANSWER: D
+# [44/100] id=5017 type=route_planning scene=a8bf42d646  (option letter)
+ANSWER: C
+# [45/100] id=5028 type=route_planning scene=c5439f4607  (option letter)
+ANSWER: C
+# [46/100] id=5050 type=route_planning scene=ac48a9b736  (option letter)
+ANSWER: D
+# [47/100] id=5074 type=route_planning scene=825d228aec  (option letter)
+ANSWER: D
+# [48/100] id=5083 type=route_planning scene=f3685d06a9  (option letter)
+ANSWER: C
+# [49/100] id=5110 type=route_planning scene=5f99900f09  (option letter)
+ANSWER: A
+# [50/100] id=5120 type=route_planning scene=a24f64f7fb  (option letter)
+ANSWER: B
+# [51/100] id=2716 type=obj_appearance_order scene=5942004064  (option letter)
+ANSWER: B
+# [52/100] id=2743 type=obj_appearance_order scene=5942004064  (option letter)
+ANSWER: B
+# [53/100] id=2755 type=obj_appearance_order scene=25f3b7a318  (option letter)
+ANSWER: B
+# [54/100] id=2768 type=obj_appearance_order scene=25f3b7a318  (option letter)
+ANSWER: A
+# [55/100] id=2769 type=obj_appearance_order scene=0d2ee665be  (option letter)
+ANSWER: A
+# [56/100] id=2806 type=obj_appearance_order scene=3db0a1c8f3  (option letter)
+ANSWER: D
+# [57/100] id=2821 type=obj_appearance_order scene=578511c8a9  (option letter)
+ANSWER: B
+# [58/100] id=2845 type=obj_appearance_order scene=d755b3d9d8  (option letter)
+ANSWER: C
+# [59/100] id=2871 type=obj_appearance_order scene=09c1414f1b  (option letter)
+ANSWER: D
+# [60/100] id=2936 type=obj_appearance_order scene=27dd4da69e  (option letter)
+ANSWER: B
+# [61/100] id=1607 type=object_abs_distance scene=c50d2d1d42  (number)
+ANSWER: 4.01
+# [62/100] id=1659 type=object_abs_distance scene=38d58a7a31  (number)
+ANSWER: 6.90
+# [63/100] id=1665 type=object_abs_distance scene=5ee7c22ba0  (number)
+ANSWER: 0.88
+# [64/100] id=1671 type=object_abs_distance scene=f9f95681fd  (number)
+ANSWER: 0.5
+# [65/100] id=1679 type=object_abs_distance scene=3864514494  (number)
+ANSWER: 4.54
+# [66/100] id=1686 type=object_abs_distance scene=13c3e046d7  (number)
+ANSWER: 1.42
+# [67/100] id=1707 type=object_abs_distance scene=7bc286c1b6  (number)
+ANSWER: 0.21
+# [68/100] id=1708 type=object_abs_distance scene=b0a08200c9  (number)
+ANSWER: 2.56
+# [69/100] id=1715 type=object_abs_distance scene=a980334473  (number)
+ANSWER: 1.30
+# [70/100] id=1802 type=object_abs_distance scene=c49a8c6cff  (number)
+ANSWER: 1.48
+# [71/100] id=2511 type=object_counting scene=acd95847c5  (number)
+ANSWER: 3
+# [72/100] id=2530 type=object_counting scene=5eb31827b7  (number)
+ANSWER: 3
+# [73/100] id=2549 type=object_counting scene=5748ce6f01  (number)
+ANSWER: 5
+# [74/100] id=2552 type=object_counting scene=c4c04e6d6c  (number)
+ANSWER: 36
+# [75/100] id=2553 type=object_counting scene=7831862f02  (number)
+ANSWER: 4
+# [76/100] id=2567 type=object_counting scene=38d58a7a31  (number)
+ANSWER: 3
+# [77/100] id=2585 type=object_counting scene=825d228aec  (number)
+ANSWER: 2
+# [78/100] id=2596 type=object_counting scene=f3d64c30f8  (number)
+ANSWER: 17
+# [79/100] id=2617 type=object_counting scene=c5439f4607  (number)
+ANSWER: 3
+# [80/100] id=2635 type=object_counting scene=99fa5c25e1  (number)
+ANSWER: 4
+# [81/100] id=2221 type=object_size_estimation scene=a24f64f7fb  (number)
+ANSWER: 32
+# [82/100] id=2237 type=object_size_estimation scene=3f15a9266d  (number)
+ANSWER: 35
+# [83/100] id=2245 type=object_size_estimation scene=5748ce6f01  (number)
+ANSWER: 197
+# [84/100] id=2246 type=object_size_estimation scene=c4c04e6d6c  (number)
+ANSWER: 21
+# [85/100] id=2247 type=object_size_estimation scene=7831862f02  (number)
+ANSWER: 107
+# [86/100] id=2257 type=object_size_estimation scene=5ee7c22ba0  (number)
+ANSWER: 157
+# [87/100] id=2276 type=object_size_estimation scene=a8bf42d646  (number)
+ANSWER: 224
+# [88/100] id=2283 type=object_size_estimation scene=31a2c91c43  (number)
+ANSWER: 7
+# [89/100] id=2301 type=object_size_estimation scene=a980334473  (number)
+ANSWER: 161
+# [90/100] id=2398 type=object_size_estimation scene=6115eddb86  (number)
+ANSWER: 69
+# [91/100] id=2673 type=room_size_estimation scene=21d970d8de  (number)
+ANSWER: 81.18
+# [92/100] id=2675 type=room_size_estimation scene=c4c04e6d6c  (number)
+ANSWER: 70.07
+# [93/100] id=2677 type=room_size_estimation scene=bde1e479ad  (number)
+ANSWER: 68.64
+# [94/100] id=2681 type=room_size_estimation scene=3864514494  (number)
+ANSWER: 10.67
+# [95/100] id=2682 type=room_size_estimation scene=40aec5fffa  (number)
+ANSWER: 9.32
+# [96/100] id=2687 type=room_size_estimation scene=31a2c91c43  (number)
+ANSWER: 9.95
+# [97/100] id=2690 type=room_size_estimation scene=7bc286c1b6  (number)
+ANSWER: 4.02
+# [98/100] id=2691 type=room_size_estimation scene=f3685d06a9  (number)
+ANSWER: 8.64
+# [99/100] id=2692 type=room_size_estimation scene=b0a08200c9  (number)
+ANSWER: 9.66
+# [100/100] id=2709 type=room_size_estimation scene=9071e139d9  (number)
+ANSWER: 47.28
