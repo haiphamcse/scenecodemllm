@@ -73,6 +73,7 @@ def build_train_dataset(jsonl_path: str, sources: Sequence[str] | None = None) -
 def build_vsibench_eval_dataset(
     hf_home: str | None = None,
     max_samples: int | None = None,
+    chosen_dataset = "scannetpp",
 ) -> Dataset:
     """Debiased VSI-Bench test split, ScanNet++ only (path contains scannetpp)."""
     load_kwargs: Dict[str, Any] = {}
@@ -88,7 +89,10 @@ def build_vsibench_eval_dataset(
         visual_paths = vsibench_doc_to_visual(ex)
         if not visual_paths:
             continue
-        if "scannetpp" not in str(visual_paths[0]).lower():
+        if chosen_dataset == "scannet":
+            if "scannet" not in str(visual_paths[0]).lower() or "scannetpp" in str(visual_paths[0]).lower():
+                continue
+        elif chosen_dataset not in str(visual_paths[0]).lower():
             continue
         user_text = vsibench_doc_to_text(ex, lmms_eval_specific_kwargs=LMMS_DEFAULT_VSIBENCH_KW)
         gt = ex["ground_truth"]
