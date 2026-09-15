@@ -1,0 +1,50 @@
+# Multi-node variant of fsdp.yaml. Launched once PER NODE; the launch script passes
+# --num_machines, --machine_rank, --num_processes (world size), --main_process_ip/port.
+compute_environment: LOCAL_MACHINE
+debug: false
+distributed_type: FSDP
+downcast_bf16: 'no'
+machine_rank: 0
+main_training_function: main
+mixed_precision: 'bf16'
+num_machines: 2
+num_processes: 8
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+fsdp_config:
+  fsdp_version: 1
+  # HYBRID_SHARD: shard within a node, replicate across nodes. FULL_SHARD would all-gather
+  # ~22 GB of fp32 params per micro-step per rank over Omni-Path; hybrid keeps that on
+  # NVLink and only all-reduces the 1.5 GB of trainable grads across nodes, once per step.
+  # Memory already fits at 4-way sharding (24.5 GiB peak on V100), so wider buys nothing.
+  fsdp_sharding_strategy: HYBRID_SHARD
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  # SelfAttentionBlock is the VGGT aggregator's block. perceiver-io happens to name
+  # a class the same, so its 2 blocks get wrapped too -- harmless, they are wholly
+  # trainable. transformers' update_fsdp_plugin_peft adds the LoRA/modules_to_save
+  # layers to this policy at prepare() time.
+  # CrossAttentionLayer is the Perceiver's cross-attention over every VGGT token --
+  # 33152 of them at resolution 512, and the tensors that OOM'd job 1952159.
+  fsdp_transformer_layer_cls_to_wrap: Qwen3VLTextDecoderLayer,Qwen3VLVisionBlock,SelfAttentionBlock,CrossAttentionLayer
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_forward_prefetch: false
+  fsdp_state_dict_type: FULL_STATE_DICT
+  fsdp_offload_params: false
+  # Required: LoRA puts trainable and frozen params in the same wrap unit.
+  fsdp_use_orig_params: true
+  # The Perceivers are randomly initialised before the Trainer seeds anything, so
+  # ranks disagree. DDP broadcasts at construction; FSDP needs this to do the same.
+  fsdp_sync_module_states: true
+  # true HERE (unlike fsdp.yaml): only rank 0 per node loads the 11 GB fp32 model into
+  # host RAM; the others build on meta and receive it via sync_module_states. Safe in
+  # the cached fork because VGGT -- whose torch.load(...).to(self.device) broke meta --
+  # is no longer constructed in the process. First tried on job 1966xxx (32 GPUs).
+  fsdp_cpu_ram_efficient_loading: true
+  # This, NOT --gradient_checkpointing (Trainer raises if both are set). It applies
+  # CheckpointImpl.NO_REENTRANT through the auto-wrap policy above, so it reaches the
+  # Perceiver -- which --gradient_checkpointing never did -- and its recompute
+  # re-triggers FSDP's all-gather, which fairscale's does not.
+  fsdp_activation_checkpointing: true

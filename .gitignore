@@ -18,3 +18,8 @@ __pycache__/
 *.pyc
 
 .claude/settings.local.json
+
+# probe renders / smoke outputs (ScanNet/ScanNet++ frames)
+viz_posed64f/ab/
+viz_posed64f/viz_out/
+results_llm/

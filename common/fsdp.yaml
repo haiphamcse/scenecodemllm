@@ -1,0 +1,44 @@
+# FSDP1 counterpart of multi_gpu.yaml, for idea_3i_590k_joint_fsdp.
+# Override at launch: --num_processes N, --mixed_precision no (V100 has no bf16).
+compute_environment: LOCAL_MACHINE
+debug: false
+distributed_type: FSDP
+downcast_bf16: 'no'
+machine_rank: 0
+main_training_function: main
+mixed_precision: 'bf16'
+num_machines: 1
+num_processes: 2
+rdzv_backend: static
+same_network: true
+tpu_use_cluster: false
+tpu_use_sudo: false
+use_cpu: false
+fsdp_config:
+  fsdp_version: 1
+  fsdp_sharding_strategy: FULL_SHARD
+  fsdp_auto_wrap_policy: TRANSFORMER_BASED_WRAP
+  # SelfAttentionBlock is the VGGT aggregator's block. perceiver-io happens to name
+  # a class the same, so its 2 blocks get wrapped too -- harmless, they are wholly
+  # trainable. transformers' update_fsdp_plugin_peft adds the LoRA/modules_to_save
+  # layers to this policy at prepare() time.
+  # CrossAttentionLayer is the Perceiver's cross-attention over every VGGT token --
+  # 33152 of them at resolution 512, and the tensors that OOM'd job 1952159.
+  fsdp_transformer_layer_cls_to_wrap: Qwen3VLTextDecoderLayer,Qwen3VLVisionBlock,SelfAttentionBlock,CrossAttentionLayer
+  fsdp_backward_prefetch: BACKWARD_PRE
+  fsdp_forward_prefetch: false
+  fsdp_state_dict_type: FULL_STATE_DICT
+  fsdp_offload_params: false
+  # Required: LoRA puts trainable and frozen params in the same wrap unit.
+  fsdp_use_orig_params: true
+  # The Perceivers are randomly initialised before the Trainer seeds anything, so
+  # ranks disagree. DDP broadcasts at construction; FSDP needs this to do the same.
+  fsdp_sync_module_states: true
+  # MUST stay false. It makes transformers load non-zero ranks on meta device, and
+  # initialize_vggt() then does torch.load(...).to(self.device) on meta params.
+  fsdp_cpu_ram_efficient_loading: false
+  # This, NOT --gradient_checkpointing (Trainer raises if both are set). It applies
+  # CheckpointImpl.NO_REENTRANT through the auto-wrap policy above, so it reaches the
+  # Perceiver -- which --gradient_checkpointing never did -- and its recompute
+  # re-triggers FSDP's all-gather, which fairscale's does not.
+  fsdp_activation_checkpointing: true
