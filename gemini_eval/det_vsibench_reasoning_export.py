@@ -63,7 +63,7 @@ def leak(text: str, row) -> str:
                 + rf"\b{re.escape(opt)}\b"]
     else:
         nums = {gt, f"{float(gt):.1f}", f"{float(gt):g}"}
-        pats = [rf"(?<![\d.])(?:{'|'.join(re.escape(n) for n in nums)})(?![\d]|D\b)"]  # '3D detections' is not a 3
+        pats = [rf"(?<![\d._^-])(?:{'|'.join(re.escape(n) for n in nums)})(?![\d]|\.\d|D\b)"]  # not '3D', not the 2 of 2.15
     for p in pats:
         for m in re.finditer(p, text, re.IGNORECASE | re.MULTILINE):
             before, after = text[max(0, m.start() - 8):m.start()], text[m.end():m.end() + 2]
@@ -102,6 +102,12 @@ def ask(proc, model, nodes, question, answer, frames, instruction, max_new_token
     return raw, clean, int(n_in), int(len(gen))
 
 
+def write_txt(out: Path, rec: dict, row):
+    (out / "per_question" / f"{rec['id']}.txt").write_text(
+        f"[{rec['scene_name']}] {rec['question_type']} id={rec['id']}\n\n{build_question(row).rsplit(chr(10), 1)[0]}"
+        f"\n\nGround-truth answer: {answer_text(row)}\n\n--- reasoning (leaked={rec['leaked']}) ---\n{rec['reasoning']}\n")
+
+
 def summarize(rows, max_new_tokens, peak_gb):
     df = pd.DataFrame(rows)
     per_type = {t: {"n": int(len(g)), "leaked": int(g["leaked"].sum()),
@@ -138,6 +144,7 @@ def main():
         rows, byid = read_jsonl(path), df.set_index("id")
         for r in rows:
             r["leak_match"] = leak(r["reasoning"], byid.loc[r["id"]]); r["leaked"] = bool(r["leak_match"])
+            write_txt(out, r, byid.loc[r["id"]])
         path.write_text("".join(json.dumps(r) + "\n" for r in rows))
         summ = summarize(rows, a.max_new_tokens, None)
         (out / "summary.json").write_text(json.dumps(summ, indent=2)); print(json.dumps(summ, indent=2)); return
@@ -166,9 +173,7 @@ def main():
                    "leaked": bool(hit), "leak_match": hit, "n_input_tokens": n_in, "n_output_tokens": n_out,
                    "seconds": round(time.time() - t1, 1)}
             f.write(json.dumps(rec) + "\n"); f.flush()
-            (out / "per_question" / f"{rec['id']}.txt").write_text(
-                f"[{sc}] {row['question_type']} id={rec['id']}\n\n{question}\n\nGround-truth answer: {answer}\n\n"
-                f"--- reasoning (leaked={rec['leaked']}) ---\n{clean}\n")
+            write_txt(out, rec, row)
             n_new += 1
             print(f"{n}/{len(df)} id={rec['id']} {row['question_type']} in={n_in} out={n_out} "
                   f"{rec['seconds']:.0f}s leaked={rec['leaked']} peak={torch.cuda.max_memory_allocated() / 2**30:.1f}GB",
