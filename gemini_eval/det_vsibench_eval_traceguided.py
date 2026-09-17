@@ -4,7 +4,8 @@ inserted as a "step-by-step guide". gemma answers directly (no CoT, no thinking)
 Resumable per question; at the end results_merged.json (same scoring) and compare.txt (baselines on the same ids).
 
   python det_vsibench_eval_traceguided.py --trace_jsonl <reasoning.jsonl> --out_dir results/det_vsibench/<run> \
-      --subset_ids <ids.json> [--baselines <dir1> <dir2>]
+      --subset_ids <ids.json> [--baselines <dir1> <dir2>] [--trace_only]
+--trace_only: leakage ceiling, question + guide only (no box list, no frames, text model).
 """
 import argparse, json, re, time
 from pathlib import Path
@@ -17,13 +18,17 @@ from det_vsibench_eval_cot import load_posed_frames
 GUIDE_HEADER = "Here is a step-by-step guide for answering this question:\n"
 FINAL_MCA = "Follow the guide and answer with only the option letter."
 FINAL_NA = "Follow the guide and answer with only a single number."
+# --trace_only: no boxes, no frames, no coordinate convention; the guide is the only scene information
+TRACE_ONLY_SYSTEM = ("You are given a step-by-step guide written for a question about an indoor scene. "
+                     "Answer using only the guide.")
 
 
-def build_user(nodes: str, row, trace: str) -> str:
-    """User text: box list, question (+options), the guide block, the answer-format line."""
+def build_user(nodes, row, trace: str) -> str:
+    """User text: box list (None in trace-only mode), question (+options), the guide block, the answer-format line."""
     question = build_question(row).rsplit("\n", 1)[0]  # drop the default 'answer directly' line
     final = FINAL_MCA if row["question_type"] in MCA_QUESTION_TYPES else FINAL_NA
-    user = f"3D detections:\n{nodes}\n\nQuestion:\n{question}\n\n{GUIDE_HEADER}{trace}\n\n{final}"
+    user = (f"3D detections:\n{nodes}\n\n" if nodes is not None else "") \
+        + f"Question:\n{question}\n\n{GUIDE_HEADER}{trace}\n\n{final}"
     gt = str(row["ground_truth"])
     assert "Ground-truth" not in user, "export answer line leaked into the prompt"
     assert not re.search(rf"answer\s*(?:is|:)\s*\(?\**{re.escape(gt)}\b", user, re.IGNORECASE), f"answer {gt} in prompt"
@@ -31,16 +36,22 @@ def build_user(nodes: str, row, trace: str) -> str:
 
 
 def ask(proc, model, user: str, frames, max_new_tokens: int):
-    """-> (raw_output, cleaned_text, n_in, n_out). Same message layout as det_vsibench_eval.ask (video mode)."""
+    """-> (raw_output, cleaned_text, n_in, n_out). Same message layout as det_vsibench_eval.ask (video mode);
+    frames=None is the trace-only text path."""
     import torch
-    note = (f"The {len(frames)} images above are video frames in temporal order; image 1 is the first video frame "
-            "(the coordinate origin).\n\n")
-    msgs = [{"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT + VIDEO_SUFFIX}]},
-            {"role": "user", "content": [{"type": "image", "image": im} for im in frames]
-             + [{"type": "text", "text": note + user}]}]
-    inputs = proc.apply_chat_template(msgs, tokenize=True, return_dict=True, add_generation_prompt=True,
-                                      return_tensors="pt", enable_thinking=False)
-    inputs = inputs.to(device=model.device, dtype=model.dtype)
+    if frames is None:
+        msgs = [{"role": "system", "content": TRACE_ONLY_SYSTEM}, {"role": "user", "content": user}]
+        text = proc.apply_chat_template(msgs, tokenize=False, add_generation_prompt=True, enable_thinking=False)
+        inputs = proc(text=text, return_tensors="pt").to(model.device)
+    else:
+        note = (f"The {len(frames)} images above are video frames in temporal order; image 1 is the first video frame "
+                "(the coordinate origin).\n\n")
+        msgs = [{"role": "system", "content": [{"type": "text", "text": SYSTEM_PROMPT + VIDEO_SUFFIX}]},
+                {"role": "user", "content": [{"type": "image", "image": im} for im in frames]
+                 + [{"type": "text", "text": note + user}]}]
+        inputs = proc.apply_chat_template(msgs, tokenize=True, return_dict=True, add_generation_prompt=True,
+                                          return_tensors="pt", enable_thinking=False)
+        inputs = inputs.to(device=model.device, dtype=model.dtype)
     n_in = inputs["input_ids"].shape[-1]
     with torch.no_grad():
         gen = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)[0, n_in:]
@@ -86,7 +97,9 @@ def main():
     ap.add_argument("--max_new_tokens", type=int, default=4096)
     ap.add_argument("--image_tokens", type=int, default=140, help="gemma-4 max_soft_tokens per frame")
     ap.add_argument("--baselines", nargs="*", default=[], help="results dirs for compare.txt (name=dir or dir)")
+    ap.add_argument("--trace_only", action="store_true", help="question + guide only: no box list, no frames")
     a = ap.parse_args()
+    mode = "trace_only" if a.trace_only else "trace_guided"
     df = pd.read_parquet(a.split_parquet)
     df = df[df["dataset"] == "scannet"].sort_values("id").reset_index(drop=True)
     ids = json.load(open(a.subset_ids)) if a.subset_ids else sorted(int(i) for i in df["id"])
@@ -108,7 +121,7 @@ def main():
     preds_path = out / "predictions_shard0.jsonl"
     done = {r["id"] for r in read_jsonl(preds_path)}  # resume
     print(f"{len(df)} questions ({len(done)} done); loading {a.llm_model}", flush=True)
-    proc, model = load_llm(a.llm_model, True, a.image_tokens)
+    proc, model = load_llm(a.llm_model, not a.trace_only, a.image_tokens)
     import torch
     nodes, t0, n_new = {}, time.time(), 0
     with preds_path.open("a") as f:
@@ -118,13 +131,19 @@ def main():
             if a.max_questions and n_new >= a.max_questions:
                 break
             sc, tr = row["scene_name"], traces[int(row["id"])]
-            if sc not in nodes:
-                nodes[sc] = det_to_nodes(json.load(open(Path(a.det_root) / sc / "det.json")))
-            frames = load_posed_frames(str(Path(a.det_root) / sc / "meta.json"), a.img_root)
-            user = build_user(nodes[sc], row, tr["reasoning"])
+            if a.trace_only:
+                frames, user = None, build_user(None, row, tr["reasoning"])
+            else:
+                if sc not in nodes:
+                    nodes[sc] = det_to_nodes(json.load(open(Path(a.det_root) / sc / "det.json")))
+                frames = load_posed_frames(str(Path(a.det_root) / sc / "meta.json"), a.img_root)
+                user = build_user(nodes[sc], row, tr["reasoning"])
             if n_new == 0:  # one full prompt for the smoke log
-                print(f"----- prompt (id={row['id']}, {len(frames)} frames as [image]) -----\n{SYSTEM_PROMPT + VIDEO_SUFFIX}\n"
-                      f"\n[image] x{len(frames)}\n{user}\n-----", flush=True)
+                if a.trace_only:
+                    print(f"----- prompt (id={row['id']}, trace-only) -----\n{TRACE_ONLY_SYSTEM}\n\n{user}\n-----", flush=True)
+                else:
+                    print(f"----- prompt (id={row['id']}, {len(frames)} frames as [image]) -----\n{SYSTEM_PROMPT + VIDEO_SUFFIX}\n"
+                          f"\n[image] x{len(frames)}\n{user}\n-----", flush=True)
             t1 = time.time()
             raw, ans, n_in, n_out = ask(proc, model, user, frames, a.max_new_tokens)
             f.write(json.dumps({"id": int(row["id"]), "scene_name": sc, "question_type": row["question_type"],
@@ -138,7 +157,8 @@ def main():
                   f"peak={torch.cuda.max_memory_allocated() / 2**30:.1f}GB", flush=True)
     rows = read_jsonl(preds_path)
     res = {"model": a.llm_model, "shard": 0, "num_shards": 1, "num_answered": len(rows), "thinking": False,
-           "trace_guided": True, "max_new_tokens": a.max_new_tokens, "video": "posed_jpg", "num_frames": 64,
+           "trace_guided": True, "trace_only": a.trace_only, "max_new_tokens": a.max_new_tokens,
+           "video": None if a.trace_only else "posed_jpg", "num_frames": 0 if a.trace_only else 64,
            "image_tokens": a.image_tokens, "skipped_leaked": int(len(skipped)), "scores": score(rows),
            "sec_per_q": round((time.time() - t0) / max(n_new, 1), 1),
            "peak_mem_gb": round(torch.cuda.max_memory_allocated() / 2**30, 1),
@@ -154,7 +174,7 @@ def main():
                                                           "scores": res["scores"]}, indent=2))
     named = {(b.split("=", 1)[0] if "=" in b else Path(b).parent.name[:16]): load_preds(Path(b.split("=", 1)[-1]))
              for b in a.baselines}
-    named["trace_guided"] = {r["id"]: r for r in rows}
+    named[mode] = {r["id"]: r for r in rows}
     qtype = dict(zip(df["id"].astype(int), df["question_type"]))
     qtype.update(zip(skipped["id"].astype(int), skipped["question_type"]))
     txt = (f"non-leaked ids (n={len(run_ids)})\n{compare(named, run_ids, qtype)}\n\n"
