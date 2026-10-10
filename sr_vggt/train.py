@@ -25,8 +25,8 @@ from transformers import AutoProcessor, HfArgumentParser, TrainerCallback
 from transformers.trainer_utils import get_last_checkpoint
 from trl import SFTConfig, SFTTrainer
 
-from . import config as cfg
 from .data import load_mix, make_collator
+from .model import VggtArguments, initialize_vggt_modules, model_class
 
 
 @dataclass
@@ -110,7 +110,7 @@ def to_dataset(rows) -> Dataset:
 def main() -> None:
     logging.basicConfig(format="%(asctime)s %(levelname)s %(message)s", level=logging.INFO,
                         handlers=[logging.StreamHandler(sys.stdout)])
-    parser = HfArgumentParser((ModelArguments, DataArguments, cfg.VggtArguments, SFTConfig))
+    parser = HfArgumentParser((ModelArguments, DataArguments, VggtArguments, SFTConfig))
     model_args, data_args, vggt_args, training_args = parser.parse_args_into_dataclasses()
 
     output_dir = Path(training_args.output_dir)
@@ -120,7 +120,7 @@ def main() -> None:
     rows = load_mix(data_args.jsonl_path)
     processor = AutoProcessor.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
     if data_args.max_seq_len:
-        from .extensions.reasoning import kept_rows
+        from .reasoning import kept_rows
         kept = kept_rows(rows, data_args.max_seq_len, output_dir, processor, data_root, vggt_args)
         rows = [rows[i] for i in kept]
     train_dataset = to_dataset(rows)
@@ -128,12 +128,12 @@ def main() -> None:
     logging.info("Train sources: %s", dict(Counter(r.get("source") for r in rows)))
     logging.info("Train question types: %s", dict(Counter(r.get("question_type") for r in rows)))
 
-    model = cfg.model_class(vggt_args).from_pretrained(
+    model = model_class(vggt_args).from_pretrained(
         model_args.model_name_or_path,
         attn_implementation=model_args.attn_implementation,
         dtype=torch.bfloat16 if training_args.bf16 else None,
     )
-    cfg.initialize_vggt_modules(model, vggt_args, processor.tokenizer)
+    initialize_vggt_modules(model, vggt_args, processor.tokenizer)
 
     training_args.eval_strategy = "no"
     training_args.dataset_kwargs = {"skip_prepare_dataset": True}
@@ -151,7 +151,7 @@ def main() -> None:
     peft_config = build_lora_config(model_args)
     if data_args.init_from_checkpoint and resume_ckpt is None:
         # First window only; later windows restore their own adapter via the resume.
-        from .extensions.reasoning import load_init_adapter
+        from .reasoning import load_init_adapter
         model = load_init_adapter(model, data_args.init_from_checkpoint)
         peft_config = None
 

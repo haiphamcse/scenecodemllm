@@ -42,7 +42,7 @@ python -m pip install --no-cache-dir "${pkgs[@]}"
 
 PYTHONPATH="${SR_ROOT}" python - <<'PY'
 import torch, transformers, trl, peft, accelerate, decord
-import sr_vggt.model, sr_vggt.ablations.spatialstack, sr_vggt.ablations.vlm3r  # vendored deps import
+import sr_vggt.model, sr_vggt.ablations  # vendored deps import
 print("ok: torch", torch.__version__, "cuda", torch.version.cuda, "| transformers", transformers.__version__,
       "trl", trl.__version__, "peft", peft.__version__, "accelerate", accelerate.__version__)
 PY

@@ -7,5 +7,5 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 load_config "${1:?usage: scripts/verify_data.sh <experiment>}"
 activate_env h100
 offline
-python -m sr_vggt.verify "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" \
+python -m sr_vggt.data "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" \
   --jsonl_path "${MIX_JSONL}" --data_root "${SR_VSI590K}" --vsibench_dir "${SR_VSIBENCH}"

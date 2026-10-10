@@ -40,8 +40,7 @@ def seq_lens(rows, processor, data_root, va) -> List[int]:
     """Full tokenised length of each row (video expansion included), without decoding videos:
     plain-tokenizer length of the chat text + the processor's video expansion, measured once per
     distinct (frame count, frame size) on black frames -- the collator's own label-span arithmetic."""
-    from ..data import task_messages, video_path
-    from ..encoders import video_meta
+    from .data import task_messages, video_meta, video_path
 
     prompt, image_patch_size = va.prompt, va.image_patch_size
     frame_ph, camera_ph = va.placeholder_texts()

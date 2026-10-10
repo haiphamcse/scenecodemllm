@@ -14,7 +14,7 @@ original runs (VSI-Bench full split, 5,130 rows, final checkpoint), which traine
 sr_vggt decodes the training videos with the eval's sampling rule and runs VGGT live in bf16, so
 the training inputs differ. Treat the scores as the level to expect, not exact targets. Eval
 itself is unchanged: the original evals already decoded VSI-Bench video and ran VGGT live, and
-`tests/parity.py` checks that the eval paths match. `scripts/eval.sh` runs A100 bf16; several
+`tests/checks.py parity` checks that the eval paths match. `scripts/eval.sh` runs A100 bf16; several
 original scores came from V100 fp32 evals.
 
 | config | original run (finetuning/) | base | what it changes vs its base | VGGT weights / input | original VSI-Bench full |

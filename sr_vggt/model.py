@@ -3,7 +3,7 @@ scattered into placeholder tokens (main and the Perceiver ablations).
 
 - Qwen3-VL encodes the video as usual (``pixel_values_videos`` -> video tokens).
 - The frozen VGGT aggregator (``vggt_model``, bf16, no grad, always in eval mode) runs inside the
-  model on each clip's ``raw_videos`` entry (encoders.vggt_input) during the prefill/training
+  model on each clip's ``raw_videos`` entry (data.vggt_input) during the prefill/training
   forward, giving ``patch [T, Np, d]`` and ``camera [T, S, d]`` (camera + register) tokens of its
   last layer. Tokens can also be passed directly (``vggt_patch_tokens`` / ``vggt_camera_tokens``).
 - ``frame_encoder``  : ``[1, T*Np, d]`` -> ``[1, L, hidden]``  scattered into L ``<|quad_start|>``
@@ -11,12 +11,16 @@ scattered into placeholder tokens (main and the Perceiver ablations).
   the way Qwen3-VL scatters its own video features, so generation needs no extra plumbing.
 - Trainable: the Perceivers (``vggt_projector``) + LoRA.
 
-Ablations (ablations/) subclass ``Qwen3VLWithVggtModel``: ``vggt_features`` picks the tokens they
+This module also holds the experiment flags (``VggtArguments``) and the per-architecture wiring.
+Ablations (ablations.py) subclass ``Qwen3VLWithVggtModel``: ``vggt_features`` picks the tokens they
 need and they override one fusion hook (``fuse_video_embeds``, ``fuse_deepstack``); their
 ``vggt_projector`` replaces the Perceivers and the placeholder scatter stays off.
 """
 
 from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import List, Optional
 
 import torch
 from torch import nn
@@ -81,6 +85,36 @@ def _single_token_id(tokenizer, token: str) -> int:
     return int(ids[0])
 
 
+def resolve_checkpoint(repo: str, filename: str, revision: Optional[str] = None) -> str:
+    """Absolute path of a weight file inside HF_HOME (download_weights.sh fetched it)."""
+    from huggingface_hub import hf_hub_download
+
+    return hf_hub_download(repo_id=repo, filename=filename, revision=revision)
+
+
+def load_aggregator(backbone: str, checkpoint: str):
+    """The backbone's aggregator with the checkpoint's ``aggregator.*`` weights (strict), on CPU,
+    eval mode, frozen. The checkpoints' heads are never built."""
+    if backbone == "omega":
+        from vggt_omega.models.aggregator import Aggregator
+
+        state = torch.load(checkpoint, map_location="cpu")
+        aggregator = Aggregator(patch_size=16, embed_dim=1024)  # = VGGTOmega()'s aggregator
+    elif backbone == "vggt1b":
+        from safetensors.torch import load_file
+        from vggt.models.aggregator import Aggregator
+
+        state = load_file(checkpoint)
+        aggregator = Aggregator()  # VGGT-1B config: img 518, patch 14, embed 1024
+    else:
+        raise ValueError(f"unknown VGGT backbone {backbone!r}")
+    aggregator.load_state_dict({k[len("aggregator."):]: v for k, v in state.items()
+                                if k.startswith("aggregator.")})
+    for p in aggregator.parameters():
+        p.requires_grad = False
+    return aggregator.eval()
+
+
 class Qwen3VLWithVggtModel(Qwen3VLModel):
     """Qwen3-VL backbone with the VGGT fusion points."""
 
@@ -110,7 +144,7 @@ class Qwen3VLWithVggtModel(Qwen3VLModel):
         ).to(device=self.device, dtype=self.dtype)
 
     def initialize_vggt(self, aggregator: nn.Module) -> None:
-        """Attach the frozen VGGT aggregator (encoders.load_aggregator) in the model's dtype."""
+        """Attach the frozen VGGT aggregator (load_aggregator) in the model's dtype."""
         self.vggt_model = aggregator.to(device=self.device, dtype=self.dtype).eval()
 
     def train(self, mode: bool = True):
@@ -397,3 +431,87 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
             loss=loss, logits=logits, past_key_values=outputs.past_key_values,
             hidden_states=outputs.hidden_states, attentions=outputs.attentions,
             rope_deltas=outputs.rope_deltas)
+
+
+# ================================ experiment flags ================================ #
+
+ARCHS = ("perceiver", "spatialstack", "vlm3r")
+
+
+@dataclass
+class VggtArguments:
+    # --- architecture / prompt ---
+    arch: str = field(default="perceiver", metadata={"help": f"One of {ARCHS}."})
+    prompt: str = field(default="clean", metadata={"help": "clean | text256 | plain | reason (data.py)."})
+    # --- VGGT backbone and what it sees (data.py) ---
+    vggt_backbone: str = field(default="omega", metadata={"help": "omega | vggt1b"})
+    vggt_repo: str = field(default="facebook/VGGT-Omega")
+    vggt_file: str = field(default="vggt_omega_1b_512.pt")
+    vggt_revision: str = field(default="", metadata={"help": "HF snapshot sha (default: main)."})
+    vggt_checkpoint: str = field(default="", metadata={"help": "Explicit weight path; default: "
+                                 "<vggt_repo>/<vggt_file> resolved inside HF_HOME."})
+    vggt_frames: str = field(default="balanced", metadata={"help": "balanced | native (data.py)."})
+    vggt_image_resolution: int = field(default=256, metadata={"help": "Balanced-resize target."})
+    vggt_layers: Optional[List[int]] = field(default=None, metadata={"help": "spatialstack: "
+                                             "aggregator layers whose patch tokens are fused."})
+    # --- frame sampling (train and eval) ---
+    video_fps: float = 1.0
+    video_max_frames: int = 64
+    image_patch_size: int = 16
+    vggt_embed_dim: int = 2048
+    # --- perceiver ---
+    frame_num_latents: int = 512
+    camera_num_latents: int = 32
+    frame_widening_factor: int = 2
+    frame_placeholder_token: str = "<|quad_start|>"
+    camera_placeholder_token: str = "<|quad_end|>"
+    # --- spatialstack ---
+    geometry_encoder_layers: List[int] = field(default_factory=lambda: [11, 17, 23])
+    geometry_fusion_layers: List[int] = field(default_factory=lambda: [0, 1, 2])
+    merger_hidden_dim: int = 4096
+    # --- vlm3r ---
+    fusion_num_heads: int = 16
+    fusion_dropout: float = 0.1
+
+    def checkpoint(self) -> str:
+        return self.vggt_checkpoint or resolve_checkpoint(
+            self.vggt_repo, self.vggt_file, self.vggt_revision or None)
+
+    def placeholder_texts(self) -> tuple[str, str]:
+        if self.arch != "perceiver":
+            return "", ""
+        return (self.frame_placeholder_token * self.frame_num_latents,
+                self.camera_placeholder_token * self.camera_num_latents)
+
+
+def model_class(args: VggtArguments):
+    if args.arch == "spatialstack":
+        from .ablations import SpatialStackForConditionalGeneration
+        return SpatialStackForConditionalGeneration
+    if args.arch == "vlm3r":
+        from .ablations import Vlm3rForConditionalGeneration
+        return Vlm3rForConditionalGeneration
+    return Qwen3VLWithVggtForConditionalGeneration
+
+
+def initialize_vggt_modules(model, args: VggtArguments, tokenizer, aggregator=None) -> None:
+    """Build the trainable VGGT module and attach the frozen backbone. Must run before PEFT
+    wrapping. ``aggregator``: a preloaded one (tests); default: load ``args.checkpoint()``."""
+    if args.arch == "spatialstack":
+        model.initialize_projector(vggt_embed_dim=args.vggt_embed_dim, vggt_layers=args.vggt_layers,
+                                   geometry_encoder_layers=args.geometry_encoder_layers,
+                                   geometry_fusion_layers=args.geometry_fusion_layers,
+                                   merger_hidden_dim=args.merger_hidden_dim)
+    elif args.arch == "vlm3r":
+        model.initialize_projector(vggt_embed_dim=args.vggt_embed_dim,
+                                   fusion_num_heads=args.fusion_num_heads,
+                                   fusion_dropout=args.fusion_dropout)
+    else:
+        model.initialize_projector(tokenizer=tokenizer, vggt_embed_dim=args.vggt_embed_dim,
+                                   frame_num_latents=args.frame_num_latents,
+                                   camera_num_latents=args.camera_num_latents,
+                                   frame_placeholder_token=args.frame_placeholder_token,
+                                   camera_placeholder_token=args.camera_placeholder_token,
+                                   frame_widening_factor=args.frame_widening_factor)
+    model.initialize_vggt(aggregator if aggregator is not None
+                          else load_aggregator(args.vggt_backbone, args.checkpoint()))

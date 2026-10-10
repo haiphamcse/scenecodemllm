@@ -78,18 +78,19 @@ Expected layout: `$SR_VSIBENCH/README.md` (it defines the `full` config), `test*
 ```
 configs/<exp>.env          one per experiment: VGGT backbone/input, mix, model/fusion, train + eval flags
 data/*.jsonl.gz            the two training mixes (video paths relative to SR_VSI590K)
-sr_vggt/                   the Python package
-  model.py                 Qwen3-VL + live frozen VGGT + Perceiver placeholder scatter; fusion hooks
-  data.py                  mix rows, prompts, collator (decodes videos, builds Qwen + VGGT inputs)
-  encoders.py              frame sampling, VGGT backbones and their input preprocessing
-  train.py eval.py verify.py merge_eval.py metrics.py config.py
-  ablations/               spatialstack.py, vlm3r.py (own fusion modules)
-  extensions/reasoning.py  reasoning-trace prompt, length filter, init-from-checkpoint, answer parsing
+sr_vggt/                   the Python package (7 files)
+  model.py                 Qwen3-VL + live frozen VGGT + Perceiver placeholder scatter (core), fusion
+                           hooks, VGGT weight loading, the experiment flags (VggtArguments)
+  ablations.py             SpatialStack and VLM-3R fusion modules (subclasses of the core)
+  data.py                  frame sampling, VGGT input preprocessing, mixes, prompts, collator, data check
+  reasoning.py             reasoning-trace prompt, length filter, init-from-checkpoint, answer parsing
+  train.py                 LoRA SFT entry point
+  eval.py                  VSI-Bench eval, shard merge, vendored lmms-eval scoring
 third_party/               vendored perceiver-io @46c6325, vggt-omega @39a0cb8, VGGT-1B (licenses inside)
 scripts/                   setup_env, download_weights, verify_data, train, eval; jobs/*.slurm; lib.sh
-tests/                     test_cpu.py (CPU checks), parity.py (GPU: eval vs the original code)
+tests/checks.py            CPU checks; GPU eval parity vs the original code (tests/parity.slurm)
 ```
 
-Train and eval build inputs with the same functions (`encoders.decode_video_frames`,
+Train and eval build inputs with the same functions (`data.decode_video_frames`,
 `data.clip_inputs`), so a clip looks the same to the model in both. Paths come only from
 `site.env`.

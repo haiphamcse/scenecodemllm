@@ -1,10 +1,16 @@
-"""Training data: mix rows, prompts, and the collator.
+"""Data: frame sampling, VGGT input preprocessing, mix rows, prompts, the collator, and the
+data check (``python -m sr_vggt.data``).
 
 Every row names a VSI-590K clip (``video``, relative to SR_VSI590K). The collator decodes it with
-the shared sampling rule (encoders.decode_video_frames: 1 fps, at most 64 frames), lets Qwen's
-processor resize the frames to the 128 tok/frame budget, and hands the model the clip's VGGT input
+the shared sampling rule (decode_video_frames: 1 fps, at most 64 frames), lets Qwen's processor
+resize the frames to the 128 tok/frame budget, and hands the model the clip's VGGT input
 (``raw_videos``); the model runs the frozen VGGT itself. eval.py builds its inputs with the same
 functions, so a clip looks identical to the model at training and at eval.
+
+VGGT input (--vggt_frames)
+  balanced  VGGT-Omega's balanced resize of the decoded frames to ~(resolution/patch)^2 patches
+            (Perceiver, VLM-3R, VGGT-1B)
+  native    Qwen's own processed pixels, so VGGT's patch grid equals Qwen's video grid (SpatialStack)
 """
 
 from __future__ import annotations
@@ -12,13 +18,16 @@ from __future__ import annotations
 import gzip
 import json
 import os
+import sys
+from dataclasses import dataclass
 from typing import Any, Callable, Dict, List
 
+import numpy as np
 import torch
+from PIL import Image
 from qwen_vl_utils import process_vision_info
+from torchvision import transforms as TF
 from transformers.trainer_pt_utils import LabelSmoother
-
-from . import encoders
 
 IGNORE_INDEX = LabelSmoother.ignore_index
 
@@ -26,6 +35,58 @@ IGNORE_INDEX = LabelSmoother.ignore_index
 # max and smart_resize asserts max >= min.
 LLM_MIN_PIXELS = 64 * 32 * 32
 LLM_MAX_PIXELS = 128 * 32 * 32
+
+PATCH_SIZE = {"omega": 16, "vggt1b": 14}
+_TO_TENSOR = TF.ToTensor()
+
+
+def decode_video_frames(path: str, video_fps: float, video_max_frames: int) -> List[Image.Image]:
+    """Video -> PIL frames at native resolution: ``video_fps`` sampling, uniform over the clip,
+    capped at ``video_max_frames`` (qwen_vl_utils.fetch_video's rule). The one sampling rule for
+    training and eval."""
+    import decord
+
+    reader = decord.VideoReader(path, num_threads=3)
+    total = len(reader)
+    native_fps = reader.get_avg_fps() or 30.0
+    n_frames = max(1, min(int(round(total / native_fps * video_fps)), video_max_frames, total))
+    idx = np.linspace(0, total - 1, n_frames).round().astype(int)
+    return [Image.fromarray(f) for f in reader.get_batch(idx).asnumpy()]
+
+
+def video_meta(path: str, video_fps: float, video_max_frames: int):
+    """(frame count, (W, H)) decode_video_frames would return, decoding one frame only."""
+    import decord
+
+    reader = decord.VideoReader(path, num_threads=1)
+    total = len(reader)
+    n_frames = max(1, min(int(round(total / (reader.get_avg_fps() or 30.0) * video_fps)), video_max_frames, total))
+    h, w = reader[0].shape[:2]
+    return n_frames, (w, h)
+
+
+def preprocess(frames: List[Image.Image], resolution: int, patch_size: int) -> torch.Tensor:
+    """Balanced mode: frames -> ``[T, C, H, W]`` in [0, 1] (load_fn.load_and_preprocess_images
+    minus the file opening): crop the aspect into [0.5, 2.0], BICUBIC resize to whichever h x w
+    keeps the patch count near ``(resolution / patch_size)**2``."""
+    from vggt_omega.utils.load_fn import _balanced_target_shape, _crop_to_supported_aspect_ratio
+
+    tensors = []
+    for frame in frames:
+        image = _crop_to_supported_aspect_ratio(frame)
+        width, height = image.size
+        target_h, target_w = _balanced_target_shape(height / max(width, 1), resolution, patch_size)
+        tensors.append(_TO_TENSOR(image.resize((target_w, target_h), Image.Resampling.BICUBIC)))
+    return torch.stack(tensors)
+
+
+def vggt_input(vggt_frames: str, frames, qwen_video: torch.Tensor, resolution: int, backbone: str) -> torch.Tensor:
+    """The ``[T, C, H, W]`` tensor in [0, 1] VGGT encodes for one clip."""
+    if vggt_frames == "native":
+        video = qwen_video.float()
+        return video / 255.0 if video.max() > 1.0 else video
+    return preprocess(frames, resolution, PATCH_SIZE[backbone])
+
 
 _SHORT_SYSTEM = ("You are a spatial reasoning assistant. You are shown 3D scene context and the "
                  "RGB frames of a scene. Answer the question about the scene.")
@@ -40,13 +101,13 @@ _TEXT256_SYSTEM = ("You are a spatial reasoning assistant. You are given three i
 #   clean    bare placeholders + "This is the 3D scene context." (main, lora128)
 #   text256  named placeholder blocks (text256, 4b, lat3072, vggt1b)
 #   plain    no placeholders (spatialstack, vlm3r: geometry enters through the video tokens)
-#   reason   text256 + reasoning-format instructions (extensions/reasoning.py)
+#   reason   text256 + reasoning-format instructions (reasoning.py)
 PROMPTS = ("text256", "clean", "plain", "reason")
 
 
 def system_prompt(prompt: str) -> str:
     if prompt == "reason":
-        from .extensions.reasoning import SYSTEM_PROMPT
+        from .reasoning import SYSTEM_PROMPT
         return SYSTEM_PROMPT
     return _TEXT256_SYSTEM if prompt == "text256" else _SHORT_SYSTEM
 
@@ -105,12 +166,12 @@ def clip_inputs(va, messages, frames):
     if not vision:
         raise ValueError("process_vision_info returned no video.")
     videos, metadata = map(list, zip(*vision))
-    raw = encoders.vggt_input(va.vggt_frames, frames, videos[0], va.vggt_image_resolution, va.vggt_backbone)
+    raw = vggt_input(va.vggt_frames, frames, videos[0], va.vggt_image_resolution, va.vggt_backbone)
     return videos, metadata, video_kwargs, raw
 
 
 def make_collator(processor, data_root, va) -> Callable[[List[Dict[str, Any]]], Dict[str, Any]]:
-    """One supervised span (the assistant answer) per row. ``va``: config.VggtArguments."""
+    """One supervised span (the assistant answer) per row. ``va``: model.VggtArguments."""
     tokenizer = processor.tokenizer
     pad_token_id = tokenizer.pad_token_id
     frame_ph, camera_ph = va.placeholder_texts()
@@ -122,7 +183,7 @@ def make_collator(processor, data_root, va) -> Callable[[List[Dict[str, Any]]], 
         full_texts, raw_videos, llm_videos, llm_metadata, spans = [], [], [], [], []
         merged_video_kwargs: Dict[str, Any] = {}
         for example in examples:
-            frames = encoders.decode_video_frames(video_path(example, data_root), va.video_fps, va.video_max_frames)
+            frames = decode_video_frames(video_path(example, data_root), va.video_fps, va.video_max_frames)
             messages = task_messages(example, frames, va.prompt, frame_ph, camera_ph,
                                      example["conversations"][1]["value"])
             t1 = processor.apply_chat_template(messages[:-1], tokenize=False, add_generation_prompt=True)
@@ -160,3 +221,54 @@ def make_collator(processor, data_root, va) -> Callable[[List[Dict[str, Any]]], 
         return batch
 
     return collate_fn
+
+
+@dataclass
+class VerifyArguments:
+    jsonl_path: str = ""
+    data_root: str = ""
+    vsibench_dir: str = ""
+    model_name_or_path: str = ""
+
+
+def verify() -> int:
+    """Data check (scripts/verify_data.sh): mix rows and every video under --data_root, VSI-Bench full =
+    5,130 rows with all videos, weights resolvable offline. Exit 1 on any problem."""
+    from transformers import HfArgumentParser
+
+    from .eval import build_rows
+    from .model import VggtArguments
+
+    a, va = HfArgumentParser((VerifyArguments, VggtArguments)).parse_args_into_dataclasses()
+    problems = []
+
+    from huggingface_hub import snapshot_download
+    try:
+        snapshot_download(a.model_name_or_path, allow_patterns=["config.json"])
+        ckpt = va.checkpoint()
+        print(f"weights: {a.model_name_or_path} ok, VGGT {ckpt} ({os.path.getsize(ckpt) / 1e9:.1f} GB)")
+    except Exception as exc:
+        problems.append(f"weights: {type(exc).__name__}: {exc} (run scripts/download_weights.sh)")
+
+    rows = load_mix(a.jsonl_path)
+    videos = sorted({video_path(r, a.data_root) for r in rows})
+    missing = [v for v in videos if not os.path.isfile(v)]
+    problems += [f"missing video: {v}" for v in missing]
+    print(f"mix {a.jsonl_path}: {len(rows)} rows, {len(videos)} videos, {len(missing)} missing under {a.data_root}")
+
+    try:
+        eval_rows = build_rows(a.vsibench_dir)
+        print(f"VSI-Bench full: {len(eval_rows)} rows, {len({r['video'] for r in eval_rows})} videos, all on disk")
+        if len(eval_rows) != 5130:
+            problems.append(f"VSI-Bench full has {len(eval_rows)} rows, expected 5130")
+    except Exception as exc:
+        problems.append(f"VSI-Bench: {type(exc).__name__}: {exc}")
+
+    print(f"{len(problems)} problems")
+    for p in problems[:20]:
+        print("  ", p)
+    return 1 if problems else 0
+
+
+if __name__ == "__main__":
+    sys.exit(verify())

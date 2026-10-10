@@ -14,8 +14,8 @@ for exp in "$@"; do
   load_config "${exp}"
   out="${OUT_ROOT}/${exp}"; mkdir -p "${out}"
   echo "=== ${exp} $(date +%T) ==="
-  python "${SR_ROOT}/tests/parity.py" old "${exp}" "${out}" > "${out}/old.log" 2>&1 || { echo "old side failed"; tail -30 "${out}/old.log"; continue; }
-  python "${SR_ROOT}/tests/parity.py" new "${exp}" "${out}" "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" \
+  python "${SR_ROOT}/tests/checks.py" parity old "${exp}" "${out}" > "${out}/old.log" 2>&1 || { echo "old side failed"; tail -30 "${out}/old.log"; continue; }
+  python "${SR_ROOT}/tests/checks.py" parity new "${exp}" "${out}" "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" \
     > "${out}/new.log" 2>&1 || { echo "new side failed"; tail -30 "${out}/new.log"; continue; }
-  python "${SR_ROOT}/tests/parity.py" compare "${exp}" "${out}" || true
+  python "${SR_ROOT}/tests/checks.py" parity compare "${exp}" "${out}" || true
 done
