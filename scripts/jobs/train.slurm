@@ -15,11 +15,10 @@ echo "=== ${SLURM_JOB_ID} | ${EXP} | ${NGPU} GPUs | $(hostname) | out ${OUT} ===
 nvidia-smi topo -m || true   # SYS between the GPUs hangs DDP: resubmit with NCCL_P2P_DISABLE=1
 
 args=(
-  "${MODEL_ARGS[@]}" "${CACHE_ARGS[@]}" "${TRAIN_ARGS[@]}"
+  "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" "${TRAIN_ARGS[@]}"
   --output_dir "${OUT}"
   --jsonl_path "${MIX_JSONL}"
   --data_root "${SR_VSI590K}"
-  --vggt_cache_root "${CACHE_ROOT}"
   --attn_implementation sdpa          # torch 2.13 SDPA beats flash-attn by 11% on H100
   --bf16 True
   --gradient_checkpointing False      # 17% faster; flip to True on OOM

@@ -69,5 +69,5 @@ for ((round = 1; round <= MAX_ROUNDS; round++)); do
   done
 done
 
-activate_env v100   # CPU-side merge on the login node
+activate_env h100   # CPU-side merge on the login node
 python -m sr_vggt.merge_eval --eval_dir "${EVAL_DIR}" 2>&1 | tail -15

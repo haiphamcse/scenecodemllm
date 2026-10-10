@@ -10,10 +10,10 @@ activate_env a100
 offline
 echo "=== ${SLURM_JOB_ID} | ${EXP} | shard ${SLURM_ARRAY_TASK_ID}/${NUM_SHARDS} ${5:+part $6/$5} | ${CKPT} ==="
 args=(
-  "${MODEL_ARGS[@]}" "${CACHE_ARGS[@]}" "${EVAL_ARGS[@]}"
+  "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" "${EVAL_ARGS[@]}"
   --adapter_path "${CKPT}"
   --output_dir "${EVAL_DIR}"
-  --vsibench_videos "${SR_VSIBENCH}"
+  --vsibench_dir "${SR_VSIBENCH}"
   --num_shards "${NUM_SHARDS}" --shard_index "${SLURM_ARRAY_TASK_ID}"
   --dtype bf16
 )

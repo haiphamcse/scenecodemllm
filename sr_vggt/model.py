@@ -2,17 +2,18 @@
 scattered into placeholder tokens (main and the Perceiver ablations).
 
 - Qwen3-VL encodes the video as usual (``pixel_values_videos`` -> video tokens).
-- The batch carries the clip's VGGT tokens: ``vggt_patch_tokens`` ``[T, Np, d]`` and
-  ``vggt_camera_tokens`` ``[T, S, d]`` (camera + register tokens), one tensor per row; from the
-  cache at training time, from the live encoder at eval (encoders.py).
+- The frozen VGGT aggregator (``vggt_model``, bf16, no grad, always in eval mode) runs inside the
+  model on each clip's ``raw_videos`` entry (encoders.vggt_input) during the prefill/training
+  forward, giving ``patch [T, Np, d]`` and ``camera [T, S, d]`` (camera + register) tokens of its
+  last layer. Tokens can also be passed directly (``vggt_patch_tokens`` / ``vggt_camera_tokens``).
 - ``frame_encoder``  : ``[1, T*Np, d]`` -> ``[1, L, hidden]``  scattered into L ``<|quad_start|>``
   ``camera_encoder`` : ``[1, T*S, d]``  -> ``[1, M, hidden]``  scattered into M ``<|quad_end|>``
   the way Qwen3-VL scatters its own video features, so generation needs no extra plumbing.
 - Trainable: the Perceivers (``vggt_projector``) + LoRA.
 
-Ablations (ablations/) subclass ``Qwen3VLWithVggtModel`` and override one of the two fusion
-hooks (``fuse_video_embeds``, ``fuse_deepstack``); their ``vggt_projector`` replaces the
-Perceivers and the placeholder scatter stays off (no placeholder ids).
+Ablations (ablations/) subclass ``Qwen3VLWithVggtModel``: ``vggt_features`` picks the tokens they
+need and they override one fusion hook (``fuse_video_embeds``, ``fuse_deepstack``); their
+``vggt_projector`` replaces the Perceivers and the placeholder scatter stays off.
 """
 
 from __future__ import annotations
@@ -73,12 +74,6 @@ class VggtPerceiver(nn.Module):
         return self.frame_encoder(patch_tokens), self.camera_encoder(camera_tokens)
 
 
-def batch_vggt(cached, batch):
-    """Collator hook: cache entries -> the model's VGGT kwargs (one tensor per row)."""
-    return {"vggt_patch_tokens": [c["patch"] for c in cached],
-            "vggt_camera_tokens": [c["camera"] for c in cached]}
-
-
 def _single_token_id(tokenizer, token: str) -> int:
     ids = tokenizer.encode(token, add_special_tokens=False)
     if len(ids) != 1:
@@ -91,6 +86,7 @@ class Qwen3VLWithVggtModel(Qwen3VLModel):
 
     def __init__(self, config):
         super().__init__(config)
+        self.vggt_model: nn.Module | None = None
         self.vggt_projector: nn.Module | None = None
         self.frame_placeholder_token: str | None = None
         self.camera_placeholder_token: str | None = None
@@ -112,6 +108,31 @@ class Qwen3VLWithVggtModel(Qwen3VLModel):
             camera_num_latents=camera_num_latents,
             frame_widening_factor=frame_widening_factor,
         ).to(device=self.device, dtype=self.dtype)
+
+    def initialize_vggt(self, aggregator: nn.Module) -> None:
+        """Attach the frozen VGGT aggregator (encoders.load_aggregator) in the model's dtype."""
+        self.vggt_model = aggregator.to(device=self.device, dtype=self.dtype).eval()
+
+    def train(self, mode: bool = True):
+        super().train(mode)
+        if self.vggt_model is not None:
+            self.vggt_model.eval()  # frozen encoder: never in train mode
+        return self
+
+    @torch.no_grad()
+    def run_vggt(self, video: torch.Tensor):
+        """``[T, C, H, W]`` in [0, 1] -> (per-layer tokens list, patch start index)."""
+        tokens_list, patch_start = self.vggt_model(video.to(device=self.device, dtype=self.dtype).unsqueeze(0))
+        return [None if t is None else t[0] for t in tokens_list], patch_start
+
+    def vggt_features(self, raw_videos) -> dict:
+        """Live VGGT -> the token kwargs this architecture's fusion consumes."""
+        patch, camera = [], []
+        for video in raw_videos:
+            tokens, ps = self.run_vggt(video)
+            patch.append(tokens[-1][:, ps:])
+            camera.append(tokens[-1][:, :ps])
+        return {"vggt_patch_tokens": patch, "vggt_camera_tokens": camera}
 
     # ----- fusion hooks (identity here; ablations override one) ----------------------- #
     def fuse_video_embeds(self, video_embeds, video_grid_thw, vggt_tokens):
@@ -183,11 +204,18 @@ class Qwen3VLWithVggtModel(Qwen3VLModel):
         image_grid_thw: torch.LongTensor | None = None,
         video_grid_thw: torch.LongTensor | None = None,
         mm_token_type_ids: torch.IntTensor | None = None,
+        raw_videos=None,
         vggt_patch_tokens=None,
         vggt_camera_tokens=None,
         vggt_tokens=None,
         **kwargs,
     ) -> tuple | Qwen3VLModelOutputWithPast:
+        # Prefill / training only: decode steps carry no video and reuse the KV cache.
+        if raw_videos is not None and pixel_values_videos is not None and self.vggt_model is not None:
+            vggt = self.vggt_features(raw_videos)
+            vggt_patch_tokens = vggt.get("vggt_patch_tokens")
+            vggt_camera_tokens = vggt.get("vggt_camera_tokens")
+            vggt_tokens = vggt.get("vggt_tokens")
         if (input_ids is None) ^ (inputs_embeds is not None):
             raise ValueError("You must specify exactly one of input_ids or inputs_embeds")
         if inputs_embeds is None:
@@ -278,6 +306,9 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
     def initialize_projector(self, **kwargs) -> None:
         self.model.initialize_projector(**kwargs)
 
+    def initialize_vggt(self, aggregator) -> None:
+        self.model.initialize_vggt(aggregator)
+
     @property
     def vggt_projector(self):
         return self.model.vggt_projector
@@ -297,6 +328,7 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
         video_grid_thw: torch.LongTensor | None = None,
         mm_token_type_ids: torch.IntTensor | None = None,
         logits_to_keep: int | torch.Tensor = 0,
+        raw_videos=None,
         vggt_patch_tokens=None,
         vggt_camera_tokens=None,
         vggt_tokens=None,
@@ -304,10 +336,6 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
         return_token_accuracy: bool = False,
         **kwargs,
     ) -> tuple | Qwen3VLCausalLMOutputWithPast:
-        from liger_kernel.transformers.model.loss_utils import (
-            LigerForCausalLMLoss, unpack_cross_entropy_result)
-        from liger_kernel.transformers.model.qwen3_vl import LigerQwen3VLCausalLMOutputWithPast
-
         # TRL injects these under --use_liger_kernel; they are ours, not self.model's.
         shift_labels = kwargs.pop("shift_labels", None)
         return_predicted_tokens = kwargs.pop("return_predicted_tokens", False)
@@ -322,6 +350,7 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
             past_key_values=past_key_values,
             inputs_embeds=inputs_embeds,
             mm_token_type_ids=mm_token_type_ids,
+            raw_videos=raw_videos,
             vggt_patch_tokens=vggt_patch_tokens,
             vggt_camera_tokens=vggt_camera_tokens,
             vggt_tokens=vggt_tokens,
@@ -337,8 +366,11 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
         if skip_logits is None:
             skip_logits = self.training and (labels is not None or shift_labels is not None)
 
-        logits = loss = token_accuracy = predicted_tokens = None
-        if skip_logits:
+        if skip_logits:  # training: Liger is imported only here (eval runs without it)
+            from liger_kernel.transformers.model.loss_utils import (
+                LigerForCausalLMLoss, unpack_cross_entropy_result)
+            from liger_kernel.transformers.model.qwen3_vl import LigerQwen3VLCausalLMOutputWithPast
+
             result = LigerForCausalLMLoss(
                 hidden_states=kept_hidden_states,
                 lm_head_weight=self.lm_head.weight,
@@ -350,19 +382,18 @@ class Qwen3VLWithVggtForConditionalGeneration(Qwen3VLForConditionalGeneration):
                 **kwargs,
             )
             loss, _, token_accuracy, predicted_tokens = unpack_cross_entropy_result(result)
-        else:
-            logits = self.lm_head(kept_hidden_states)
-            if labels is not None or shift_labels is not None:
-                loss = self.loss_function(logits=logits, labels=labels, shift_labels=shift_labels,
-                                          vocab_size=self.config.text_config.vocab_size, **kwargs)
+            return LigerQwen3VLCausalLMOutputWithPast(
+                loss=loss, logits=None, past_key_values=outputs.past_key_values,
+                hidden_states=outputs.hidden_states, attentions=outputs.attentions,
+                rope_deltas=outputs.rope_deltas, token_accuracy=token_accuracy,
+                predicted_tokens=predicted_tokens)
 
-        return LigerQwen3VLCausalLMOutputWithPast(
-            loss=loss,
-            logits=logits,
-            past_key_values=outputs.past_key_values,
-            hidden_states=outputs.hidden_states,
-            attentions=outputs.attentions,
-            rope_deltas=outputs.rope_deltas,
-            token_accuracy=token_accuracy,
-            predicted_tokens=predicted_tokens,
-        )
+        logits = self.lm_head(kept_hidden_states)
+        loss = None
+        if labels is not None or shift_labels is not None:
+            loss = self.loss_function(logits=logits, labels=labels, shift_labels=shift_labels,
+                                      vocab_size=self.config.text_config.vocab_size, **kwargs)
+        return Qwen3VLCausalLMOutputWithPast(
+            loss=loss, logits=logits, past_key_values=outputs.past_key_values,
+            hidden_states=outputs.hidden_states, attentions=outputs.attentions,
+            rope_deltas=outputs.rope_deltas)

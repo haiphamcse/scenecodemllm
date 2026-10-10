@@ -1,6 +1,6 @@
 #!/bin/bash
 # Train an experiment: chained 4 h windows on 2 x H100 (qos_gpu_h100-t3), kept queued by a
-# login-node watcher until the final adapter is saved (~4-6 windows for the 2B runs).
+# login-node watcher until the final adapter is saved. Videos are decoded and VGGT runs live.
 #
 #   scripts/train.sh <experiment> [extra sr_vggt.train flags]
 #   SMOKE=1 scripts/train.sh <experiment> --max_steps 20     one 2 h dev window, no watcher,
@@ -35,8 +35,7 @@ submit() {  # [sbatch flags...] -> job id
 }
 
 if (( ! WATCH )); then
-  [[ -f "${MIX_JSONL}" ]] || { echo "ERROR: mix ${MIX_JSONL} missing (scripts/unpack_data.sh)" >&2; exit 1; }
-  [[ -d "${CACHE_ROOT}" ]] || { echo "ERROR: cache ${CACHE_ROOT} missing (scripts/export_vggt.sh ${CACHE})" >&2; exit 1; }
+  [[ -d "${SR_VSI590K}" ]] || { echo "ERROR: SR_VSI590K=${SR_VSI590K} missing (site.env)" >&2; exit 1; }
   [[ -f "${OUT}/adapter_config.json" ]] && { echo "${OUT} already holds a final adapter; nothing to do."; exit 0; }
   mkdir -p "${OUT}"
   if (( SMOKE )); then

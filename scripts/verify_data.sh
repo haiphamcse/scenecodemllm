@@ -1,12 +1,11 @@
 #!/bin/bash
-# Full-scan data check for one experiment (login node, CPU): mix rows, det_es frames, every cache
-# entry fresh with one row per frame, VSI-Bench full = 5,130 rows with all videos, weights offline.
-#   scripts/verify_data.sh <experiment>      exit 0 = ready to train and eval
+# Data check for one experiment (login node, CPU): mix rows and every video under SR_VSI590K,
+# VSI-Bench full = 5,130 rows with all videos, weights offline. Exit 0 = ready to train and eval.
+#   scripts/verify_data.sh <experiment>
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 load_config "${1:?usage: scripts/verify_data.sh <experiment>}"
-activate_env v100
+activate_env h100
 offline
-python -m sr_vggt.verify "${MODEL_ARGS[@]}" "${CACHE_ARGS[@]}" \
-  --jsonl_path "${MIX_JSONL}" --data_root "${SR_VSI590K}" --vggt_cache_root "${CACHE_ROOT}" \
-  --vsibench_videos "${SR_VSIBENCH}"
+python -m sr_vggt.verify "${MODEL_ARGS[@]}" "${VGGT_ARGS[@]}" \
+  --jsonl_path "${MIX_JSONL}" --data_root "${SR_VSI590K}" --vsibench_dir "${SR_VSIBENCH}"

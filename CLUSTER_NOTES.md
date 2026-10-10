@@ -2,11 +2,11 @@
 
 Short list of what has bitten before. The scripts already handle all of it.
 
-- **Pick the GPU with `-C h100|a100|v100-32g`, never `--partition`.** A partition flag trips the
+- **Pick the GPU with `-C h100|a100`, never `--partition`.** A partition flag trips the
   IDRIS submit filter (`Account xyz@h100 ----- Job type v100`). The account must match too:
   `--account=<project>@h100`.
-- **No `--mem`.** It is rejected. RAM scales with `--cpus-per-task`, which is 24 per H100, 8 per
-  A100, and 10 per V100.
+- **No `--mem`.** It is rejected. RAM scales with `--cpus-per-task`, which is 24 per H100 and 8 per
+  A100. Training decodes video in 8 dataloader workers per GPU, so keep the 24 cores per H100.
 - **QoS wall times.** `-dev` QoS: 2 h, and at most ~10 jobs per user (larger arrays are
   rejected). `-t3`: 20 h. `-t4`: 100 h, lower priority. Training uses 4 h windows on
   `qos_gpu_h100-t3`.
@@ -21,14 +21,15 @@ Short list of what has bitten before. The scripts already handle all of it.
   Jobs run with `HF_HUB_OFFLINE=1` so that a missing file fails at once instead of hanging.
 - **Locale.** Compute nodes drop UTF-8, and TRL's model card then kills every checkpoint save
   (`UnicodeDecodeError 0xc3`), after the step itself succeeded. `lib.sh` sets `PYTHONUTF8=1`.
-- **`$SCRATCH` is purged** after about 30 days without access. Data, caches and results live
-  there, so copy finished checkpoints you care about to `$WORK` or `$STORE`. Weights and venvs live
-  on `$WORK`.
+- **`$SCRATCH` is purged** after about 30 days without access. Videos and results live there,
+  so copy finished checkpoints you care about to `$WORK` or `$STORE`. Weights and venvs live on
+  `$WORK`.
 - **Inode quotas.** `$WORK` allows 500k inodes per project (a conda env costs about 150k; a module
-  venv about 2k). Check with `idr_quota_user` / `idr_quota_project`. The data zip unpacks about
-  300k files: put it on `$SCRATCH`.
-- **Lustre is metadata-bound.** Many small files take hours to create or rsync. Unzip in a
-  detached session.
+  venv about 2k). Check with `idr_quota_user` / `idr_quota_project`.
+- **Lustre is metadata-bound.** Many small files take hours to create or rsync, and large video
+  reads are bandwidth-bound. If the dataloader starves (GPU idle between steps), lower
+  `--dataloader_num_workers` before raising it: 12 workers per rank once exhausted decord's EOF
+  retries (`DECORD_EOF_RETRY_MAX` is raised in `lib.sh`).
 - **HF cache files are symlinks into `blobs/`.** When copying one snapshot file, use `rsync -aL`.
 - **Login-node watchers** (`train.sh`, `eval.sh`) run under `nohup bash -l`, because a non-login
   shell lacks the Slurm and `$WORK` environment. There are several login nodes (jean-zay1..5).

@@ -1,101 +1,87 @@
-"""Frozen VGGT backbones: checkpoint lookup, frame preprocessing, token extraction.
+"""Frozen VGGT backbones and the frames they see. Training and eval share every function here.
 
-Shared by export.py (writes the training cache from det_es JPEGs) and eval.py (runs the same
-encoder live on decoded VSI-Bench video), so training and eval see identically computed tokens.
-
-Backbones
+Backbones (vendored in third_party/)
   omega   facebook/VGGT-Omega aggregator (patch 16, 1 camera + 16 register tokens per frame)
-  vggt1b  facebook/VGGT-1B aggregator, vendored in ablations/vggt1b/vggt (patch 14, 1 + 4)
+  vggt1b  facebook/VGGT-1B aggregator (patch 14, 1 camera + 4 register tokens per frame)
 
-Frame modes
-  balanced  VGGT-Omega's balanced resize to ~(resolution/patch)^2 patches (Perceiver, VLM-3R)
-  native    the det_es / Qwen pixels untouched, so VGGT's patch grid equals Qwen's (SpatialStack)
+VGGT input (--vggt_frames)
+  balanced  VGGT-Omega's balanced resize of the decoded frames to ~(resolution/patch)^2 patches
+            (Perceiver, VLM-3R, VGGT-1B)
+  native    Qwen's own processed pixels, so VGGT's patch grid equals Qwen's video grid (SpatialStack)
 """
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-from typing import Dict, List, Optional
+from typing import List, Optional
 
+import numpy as np
 import torch
 from PIL import Image
 from torchvision import transforms as TF
 
 PATCH_SIZE = {"omega": 16, "vggt1b": 14}
 _TO_TENSOR = TF.ToTensor()
-_VGGT1B_DIR = Path(__file__).resolve().parent / "ablations" / "vggt1b"
 
 
 def resolve_checkpoint(repo: str, filename: str, revision: Optional[str] = None) -> str:
-    """Absolute path of a weight file inside HF_HOME (download_weights.sh fetched it).
-
-    This exact string is stamped into every cache entry (``vggt_checkpoint``), so a cache is
-    only reusable under the same HF_HOME.
-    """
+    """Absolute path of a weight file inside HF_HOME (download_weights.sh fetched it)."""
     from huggingface_hub import hf_hub_download
 
     return hf_hub_download(repo_id=repo, filename=filename, revision=revision)
 
 
-def cache_params(backbone: str, checkpoint: str, frames: str, video_fps: float,
-                 video_max_frames: int, resolution: Optional[int] = None,
-                 layers: Optional[List[int]] = None) -> Dict:
-    """Everything a cached tensor depends on. The key sets match the caches the original
-    experiments trained on, so those remain loadable."""
-    params = {"video_fps": float(video_fps), "video_max_frames": int(video_max_frames),
-              "vggt_checkpoint": str(checkpoint)}
-    if frames == "native":
-        params["frames"] = "det_es_native"
-        params["vggt_layers"] = [int(l) for l in layers]
-    else:
-        params["frames"] = "det_es"
-        params["vggt_image_resolution"] = int(resolution)
-    if backbone == "vggt1b":
-        params["vggt_patch_size"] = PATCH_SIZE["vggt1b"]
-    return params
-
-
-def load_aggregator(backbone: str, checkpoint: str, device, dtype: torch.dtype):
-    """The frozen aggregator of the given backbone, in eval mode, no grads."""
+def load_aggregator(backbone: str, checkpoint: str):
+    """The backbone's aggregator with the checkpoint's ``aggregator.*`` weights (strict), on CPU,
+    eval mode, frozen. The checkpoints' heads are never built."""
     if backbone == "omega":
-        from vggt_omega.models import VGGTOmega
+        from vggt_omega.models.aggregator import Aggregator
 
         state = torch.load(checkpoint, map_location="cpu")
-        # The text-aligned checkpoint carries text_alignment_head weights: build the head so
-        # the strict load accepts them. Only the aggregator is kept either way.
-        vggt = VGGTOmega(enable_alignment=any(k.startswith("text_alignment_head") for k in state))
-        vggt.load_state_dict(state)
-        aggregator = vggt.aggregator
+        aggregator = Aggregator(patch_size=16, embed_dim=1024)  # = VGGTOmega()'s aggregator
     elif backbone == "vggt1b":
-        from safetensors import safe_open
+        from safetensors.torch import load_file
+        from vggt.models.aggregator import Aggregator
 
-        if str(_VGGT1B_DIR) not in sys.path:
-            sys.path.insert(0, str(_VGGT1B_DIR))
-        from vggt.models.aggregator import Aggregator  # vendored, see ablations/vggt1b/vggt
-
-        with safe_open(checkpoint, framework="pt") as f:
-            state = {k[len("aggregator."):]: f.get_tensor(k)
-                     for k in f.keys() if k.startswith("aggregator.")}
+        state = load_file(checkpoint)
         aggregator = Aggregator()  # VGGT-1B config: img 518, patch 14, embed 1024
-        aggregator.load_state_dict(state)
-        assert aggregator.patch_size == PATCH_SIZE["vggt1b"], aggregator.patch_size
-        assert aggregator.patch_start_idx == 5, aggregator.patch_start_idx
     else:
         raise ValueError(f"unknown VGGT backbone {backbone!r}")
-    aggregator = aggregator.to(device=device, dtype=dtype).eval()
+    aggregator.load_state_dict({k[len("aggregator."):]: v for k, v in state.items()
+                                if k.startswith("aggregator.")})
     for p in aggregator.parameters():
         p.requires_grad = False
-    return aggregator
+    return aggregator.eval()
+
+
+def decode_video_frames(path: str, video_fps: float, video_max_frames: int) -> List[Image.Image]:
+    """Video -> PIL frames at native resolution: ``video_fps`` sampling, uniform over the clip,
+    capped at ``video_max_frames`` (qwen_vl_utils.fetch_video's rule). The one sampling rule for
+    training and eval."""
+    import decord
+
+    reader = decord.VideoReader(path, num_threads=3)
+    total = len(reader)
+    native_fps = reader.get_avg_fps() or 30.0
+    n_frames = max(1, min(int(round(total / native_fps * video_fps)), video_max_frames, total))
+    idx = np.linspace(0, total - 1, n_frames).round().astype(int)
+    return [Image.fromarray(f) for f in reader.get_batch(idx).asnumpy()]
+
+
+def video_meta(path: str, video_fps: float, video_max_frames: int):
+    """(frame count, (W, H)) decode_video_frames would return, decoding one frame only."""
+    import decord
+
+    reader = decord.VideoReader(path, num_threads=1)
+    total = len(reader)
+    n_frames = max(1, min(int(round(total / (reader.get_avg_fps() or 30.0) * video_fps)), video_max_frames, total))
+    h, w = reader[0].shape[:2]
+    return n_frames, (w, h)
 
 
 def preprocess(frames: List[Image.Image], resolution: int, patch_size: int) -> torch.Tensor:
-    """Balanced mode: frames -> ``[T, C, H, W]`` in [0, 1], the way VGGT-Omega asks.
-
-    load_fn.load_and_preprocess_images(mode="balanced") minus the file opening: crop the aspect
-    ratio into [0.5, 2.0], BICUBIC resize to whichever h x w keeps the patch count near
-    ``(resolution / patch_size)**2``, ToTensor.
-    """
+    """Balanced mode: frames -> ``[T, C, H, W]`` in [0, 1] (load_fn.load_and_preprocess_images
+    minus the file opening): crop the aspect into [0.5, 2.0], BICUBIC resize to whichever h x w
+    keeps the patch count near ``(resolution / patch_size)**2``."""
     from vggt_omega.utils.load_fn import _balanced_target_shape, _crop_to_supported_aspect_ratio
 
     tensors = []
@@ -103,31 +89,13 @@ def preprocess(frames: List[Image.Image], resolution: int, patch_size: int) -> t
         image = _crop_to_supported_aspect_ratio(frame)
         width, height = image.size
         target_h, target_w = _balanced_target_shape(height / max(width, 1), resolution, patch_size)
-        image = image.resize((target_w, target_h), Image.Resampling.BICUBIC)
-        tensors.append(_TO_TENSOR(image))
-    return torch.stack(tensors)  # one size per clip; stack fails loudly otherwise
+        tensors.append(_TO_TENSOR(image.resize((target_w, target_h), Image.Resampling.BICUBIC)))
+    return torch.stack(tensors)
 
 
-@torch.no_grad()
-def encode(aggregator, video: torch.Tensor, device, dtype: torch.dtype,
-           layers: Optional[List[int]] = None) -> Dict[str, torch.Tensor]:
-    """``[T, C, H, W]`` in [0, 1] -> cache tensors, fp32 on the CPU.
-
-    layers=None: last layer, ``patch [T, Np, d]`` + ``camera [T, S, d]`` (camera + registers).
-    layers=[...]: patch tokens of each listed aggregator layer, ``patch_<i>``.
-    """
-    tokens_list, patch_start = aggregator(video.to(device=device, dtype=dtype).unsqueeze(0))
-    if layers is None:
-        final = tokens_list[-1][0]  # [T, S + Np, d]
-        return {"patch": final[:, patch_start:, :].float().cpu(),
-                "camera": final[:, :patch_start, :].float().cpu()}
-    return {f"patch_{i}": tokens_list[l][0][:, patch_start:, :].float().cpu()
-            for i, l in enumerate(layers)}
-
-
-def frames_to_video(frames: List[Image.Image], mode: str, resolution: Optional[int],
-                    backbone: str) -> torch.Tensor:
-    """det_es frames -> the VGGT input tensor of a cache's frame mode."""
-    if mode == "native":
-        return torch.stack([_TO_TENSOR(f) for f in frames])
+def vggt_input(vggt_frames: str, frames, qwen_video: torch.Tensor, resolution: int, backbone: str) -> torch.Tensor:
+    """The ``[T, C, H, W]`` tensor in [0, 1] VGGT encodes for one clip."""
+    if vggt_frames == "native":
+        video = qwen_video.float()
+        return video / 255.0 if video.max() > 1.0 else video
     return preprocess(frames, resolution, PATCH_SIZE[backbone])

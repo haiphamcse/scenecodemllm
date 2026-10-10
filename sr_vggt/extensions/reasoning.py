@@ -36,11 +36,15 @@ def parse_answer(text: str) -> str:
     return lines[-1][len("Answer:"):].strip() if lines else text
 
 
-def seq_lens(rows, processor, data_root, prompt, frame_ph, camera_ph, image_patch_size=16) -> List[int]:
-    """Full tokenised length of each row (video expansion included), without loading frames:
+def seq_lens(rows, processor, data_root, va) -> List[int]:
+    """Full tokenised length of each row (video expansion included), without decoding videos:
     plain-tokenizer length of the chat text + the processor's video expansion, measured once per
     distinct (frame count, frame size) on black frames -- the collator's own label-span arithmetic."""
-    from ..data import det_es_dir, task_messages, video_path
+    from ..data import task_messages, video_path
+    from ..encoders import video_meta
+
+    prompt, image_patch_size = va.prompt, va.image_patch_size
+    frame_ph, camera_ph = va.placeholder_texts()
 
     tokenizer = processor.tokenizer
     deltas: Dict[tuple, int] = {}
@@ -63,8 +67,7 @@ def seq_lens(rows, processor, data_root, prompt, frame_ph, camera_ph, image_patc
     for row in rows:
         path = video_path(row, data_root)
         if path not in metas:
-            files = sorted(det_es_dir(path).glob("frame*.jpg"))
-            metas[path] = (len(files), Image.open(files[0]).size)
+            metas[path] = video_meta(path, va.video_fps, va.video_max_frames)
         msgs = task_messages(row, [], prompt, frame_ph, camera_ph, row["conversations"][1]["value"])
         text = processor.apply_chat_template(msgs, tokenize=False)
         out.append(len(tokenizer(text)["input_ids"]) + delta_for(*metas[path]))

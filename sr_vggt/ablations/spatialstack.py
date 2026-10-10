@@ -1,8 +1,8 @@
 """SpatialStack ablation: layered VGGT fusion through Qwen3-VL's own deepstack slots.
 
-- No placeholder tokens (--prompt plain). The cache holds patch tokens of VGGT layers 11/17/23,
-  computed on the det_es pixels Qwen itself sees (frame mode ``native``), so VGGT's patch grid
-  equals Qwen's video grid.
+- No placeholder tokens (--prompt plain). VGGT runs on the pixels Qwen itself sees
+  (--vggt_frames native), so its patch grid equals Qwen's video grid; the patch tokens of layers
+  --vggt_layers (11/17/23) are kept.
 - Each fused layer gets a ``VggtGeometryMerger`` (RMSNorm -> m x m patch-block merge -> MLP to the
   text hidden size, last Linear zero-init), giving one geometry vector per Qwen video token.
 - Those are added to ``deepstack_visual_embeds[layer]`` for decoder layers ``--geometry_fusion_layers``
@@ -23,8 +23,8 @@ def group_frames(feats: torch.Tensor, grid_t: int) -> torch.Tensor:
     """``[T, ...]`` per-frame features -> ``[grid_t, ...]``, packed the way Qwen packs frames.
 
     Qwen3-VL's video processor repeats the LAST frame when T is not a multiple of
-    temporal_patch_size and folds tps frames into one token grid (70 of the 4,878 clips have an
-    odd det_es frame count). Averaging each group turns per-frame features into per-token ones.
+    temporal_patch_size and folds tps frames into one token grid (clips can have an odd frame
+    count). Averaging each group turns per-frame features into per-token ones.
     """
     t = feats.shape[0]
     if t == grid_t:
@@ -36,15 +36,6 @@ def group_frames(feats: torch.Tensor, grid_t: int) -> torch.Tensor:
     if pad:
         feats = torch.cat([feats, feats[-1:].expand(pad, *feats.shape[1:])], dim=0)
     return feats.view(grid_t, tps, *feats.shape[1:]).mean(dim=1)
-
-
-def batch_vggt(cached, batch):
-    """Collator hook: fold each clip's frames into Qwen's temporal groups in the worker (exact,
-    the mergers' RMSNorm runs after; halves the shared-memory payload)."""
-    return {"vggt_patch_tokens": [
-        [group_frames(c[f"patch_{i}"], int(grid[0])) for i in range(len(c))]
-        for c, grid in zip(cached, batch["video_grid_thw"])
-    ]}
 
 
 class VggtGeometryMerger(nn.Module):
@@ -93,10 +84,19 @@ class VggtLayeredFusion(nn.Module):
 class SpatialStackModel(Qwen3VLWithVggtModel):
     def __init__(self, config):
         super().__init__(config)
-        self.geometry_cache_indices: list[int] = []
+        self.vggt_layers: list[int] = []
+        self.geometry_layer_indices: list[int] = []
         self.geometry_fusion_layers: list[int] = []
 
-    def initialize_projector(self, vggt_embed_dim: int, cached_layers: list[int],
+    def vggt_features(self, raw_videos) -> dict:
+        """Patch tokens of each of --vggt_layers, per clip (one frame per VGGT frame)."""
+        out = []
+        for video in raw_videos:
+            tokens, ps = self.run_vggt(video)
+            out.append([tokens[l][:, ps:] for l in self.vggt_layers])
+        return {"vggt_patch_tokens": out}
+
+    def initialize_projector(self, vggt_embed_dim: int, vggt_layers: list[int],
                              geometry_encoder_layers: list[int], geometry_fusion_layers: list[int],
                              merger_hidden_dim: int = 4096) -> None:
         if len(geometry_encoder_layers) != len(geometry_fusion_layers):
@@ -104,10 +104,11 @@ class SpatialStackModel(Qwen3VLWithVggtModel):
         n_dec = int(self.config.text_config.num_hidden_layers)
         if any(not 0 <= l < n_dec for l in geometry_fusion_layers):
             raise ValueError(f"fusion layers {geometry_fusion_layers} outside the {n_dec} decoder layers.")
-        missing = [l for l in geometry_encoder_layers if l not in cached_layers]
+        missing = [l for l in geometry_encoder_layers if l not in vggt_layers]
         if missing:
-            raise ValueError(f"VGGT layers {missing} are not in the cache (holds {cached_layers}).")
-        self.geometry_cache_indices = [cached_layers.index(l) for l in geometry_encoder_layers]
+            raise ValueError(f"geometry layers {missing} are not among --vggt_layers {vggt_layers}.")
+        self.vggt_layers = list(vggt_layers)
+        self.geometry_layer_indices = [vggt_layers.index(l) for l in geometry_encoder_layers]
         self.geometry_fusion_layers = list(geometry_fusion_layers)
         self.vggt_projector = VggtLayeredFusion(
             num_layers=len(geometry_encoder_layers),
@@ -120,12 +121,11 @@ class SpatialStackModel(Qwen3VLWithVggtModel):
     def _geometry_layer_embeds(self, patch_tokens, grid_t, grid_h, grid_w, dtype, device):
         """One ``[num_video_tokens, hidden]`` geometry tensor per fusion layer, for one clip."""
         feats_per_layer = []
-        for idx in self.geometry_cache_indices:
+        for idx in self.geometry_layer_indices:
             patches = patch_tokens[idx].to(device=device, dtype=dtype)
             if patches.shape[1] != grid_h * grid_w:
-                raise ValueError(f"VGGT entry has {patches.shape[1]} patch tokens per frame but Qwen's "
-                                 f"video grid is {grid_h}x{grid_w}; the features came from other pixels.")
-            # No-op when the collator already grouped (training); real work at eval.
+                raise ValueError(f"VGGT gives {patches.shape[1]} patch tokens per frame but Qwen's "
+                                 f"video grid is {grid_h}x{grid_w}; VGGT saw other pixels.")
             feats_per_layer.append(group_frames(patches, grid_t).view(grid_t, grid_h, grid_w, -1))
         # Through the module, not .mergers, so PEFT's modules_to_save wrapper stays on the path.
         return self.vggt_projector(feats_per_layer)

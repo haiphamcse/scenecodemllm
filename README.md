@@ -1,60 +1,54 @@
 # sr_vggt
 
 Spatial-reasoning finetuning of Qwen3-VL with geometry features from a frozen VGGT model, trained
-and evaluated on the IDRIS Jean Zay cluster. The main model reaches 0.600 on VSI-Bench (full split).
-The best ablations reach 0.621 (SpatialStack fusion, 2B) and 0.678 (4B). [EXPERIMENTS.md](EXPERIMENTS.md) lists every configuration and the scores
-to reproduce. [CLUSTER_NOTES.md](CLUSTER_NOTES.md) collects the Jean Zay pitfalls.
+and evaluated on the IDRIS Jean Zay cluster. [EXPERIMENTS.md](EXPERIMENTS.md) lists every
+configuration and the scores of the original runs. [CLUSTER_NOTES.md](CLUSTER_NOTES.md) collects
+the Jean Zay pitfalls.
 
-**Main model.** Qwen3-VL-2B sees 64 RGB frames per clip (128 tokens per frame). VGGT-Omega
-(1B, 512 checkpoint) encodes the same frames. Two Perceiver IO encoders compress its patch tokens into 512 latents and its
-camera tokens into 32 latents. Those latents replace placeholder tokens in the prompt
-("... This is the 3D scene context."). Training
-uses LoRA (r64) on the LLM plus the Perceivers, for one epoch over a 190k-question mix built
-from VSI-590K and VLM-3R data.
+**Main model.** Each clip is decoded at 1 fps (at most 64 frames). Qwen3-VL-2B sees the frames at
+128 tokens per frame. A frozen VGGT-Omega (1B, 512 checkpoint) runs on the same frames inside the
+model, in bf16 with no gradients. Two Perceiver IO encoders compress its patch tokens into 512
+latents and its camera tokens into 32 latents. Those latents replace placeholder tokens in the
+prompt. Training uses LoRA (r64) on the LLM plus the Perceivers, for one epoch over a
+190k-question mix of VSI-590K and VLM-3R questions on 4,878 VSI-590K videos.
 
-## Quickstart (new user, Jean Zay)
+The repo holds everything except the videos and the model weights: the two training mixes
+(`data/*.jsonl.gz`), and vendored copies of perceiver-io, VGGT-Omega and VGGT-1B
+(`third_party/`, with their licenses).
 
-You need a Jean Zay project with V100, A100 and H100 hours, a Hugging Face account, and the data
-zip.
+## Quickstart (Jean Zay)
 
-**Licensing:** the zip holds frames and videos derived from ScanNet, ScanNet++ and ARKitScenes. You
-may receive it only if you signed those datasets' terms yourself. Do not redistribute it or put it
-anywhere public.
-
-All steps run from a Jean Zay **login node**, in the code directory (`$WORK/sr_vggt`).
+You need a Jean Zay project with A100 and H100 hours, a Hugging Face account, and the VSI-590K
+videos. All steps run from a Jean Zay **login node**, in the code directory (e.g.
+`$WORK/sr_vggt`).
 
 ```bash
-# 0. Config: paths, project. Everything below reads it.
+# 0. Videos. Training reads <SR_VSI590K>/{arkitscenes,scannet,scannetppv2}/<scene>.mp4 (4,878
+#    clips, ~132 GB) from the nyu-visionx/VSI-590K dataset. Eval data: see "VSI-Bench" below.
+
+# 1. Config: project, video dirs, HF_HOME, envs, outputs. Every script reads it.
 cp site.env.example site.env && $EDITOR site.env
 
-# 1. Python envs (once; ~15 min each; login node has internet through the IDRIS proxy).
-scripts/setup_env.sh h100      # training
+# 2. Python envs (once, ~15 min each; the login node has internet through the IDRIS proxy).
+scripts/setup_env.sh h100      # training + login-node tools
 scripts/setup_env.sh a100      # eval
-scripts/setup_env.sh v100      # VGGT export + login-node tools
 
-# 2. Weights + VSI-Bench question table into HF_HOME (compute nodes are offline).
-#    Gated repos need a token whose account accepted their terms on huggingface.co:
-#    `export HF_TOKEN=...` in this shell, or `HF_HOME=<SR_HF_HOME> hf auth login`. Never commit it.
+# 3. Weights into HF_HOME (compute nodes are offline). Gated repos need a token whose account
+#    accepted their terms on huggingface.co: `export HF_TOKEN=...` in this shell, or
+#    `HF_HOME=<SR_HF_HOME> hf auth login`. Never commit it.
 scripts/download_weights.sh
 
-# 3. Data: ~300k files, tens of minutes on Lustre (run inside screen/tmux).
-scripts/unpack_data.sh /path/to/sr_vggt_data.zip
-
-# 4. VGGT feature caches (V100 dev, 10 shards x ~45 min). Rerun after a timeout: it resumes.
-scripts/export_vggt.sh es          # main, lora128, vlm3r
-#   es_text (text256, 4b, lat3072, reason16k), es_ss (spatialstack), es_vggt1b (vggt1b)
-
-# 5. Full data check for an experiment (exact counts; exit 0 = ready).
+# 4. Data check for an experiment (counts every row and video; exit 0 = ready).
 scripts/verify_data.sh main
 
-# 6. Smoke test: one 2 h dev window, 20 steps, into $SR_OUTPUT_ROOT/_smoke_sr_vggt_main.
+# 5. Smoke test: one 2 h dev window, 20 steps, into $SR_OUTPUT_ROOT/_smoke_sr_vggt_main.
 SMOKE=1 scripts/train.sh main --max_steps 20
 #    then the real run: 4 h windows on 2xH100, chained by a login-node watcher until done.
 scripts/train.sh main
 
-# 7. VSI-Bench full eval: 8 A100 shards + resubmit + merge; score in the watcher log and in
+# 6. VSI-Bench full eval: 8 A100 shards + resubmit + merge; score in the watcher log and in
 #    <run>/eval_checkpoint-743_full/results_full_merged.json.
-scripts/eval.sh main $SCRATCH/sr_vggt_results/sr_vggt_main/checkpoint-743
+scripts/eval.sh main $SR_OUTPUT_ROOT/sr_vggt_main/checkpoint-743
 ```
 
 `<experiment>` is any `configs/<name>.env`: `main lora128 text256 4b lat3072 vggt1b spatialstack
@@ -62,30 +56,40 @@ vlm3r reason16k`. `reason16k` extends the text256 ablation and starts from
 `sr_vggt_text256/checkpoint-743`, so train `text256` first. To start from another checkpoint,
 set `INIT_CKPT=<dir>`.
 
+## VSI-Bench
+
+The eval needs a local copy of the `nyu-visionx/VSI-Bench` dataset repository, with its three
+video zips unzipped in place. `SR_VSIBENCH` in `site.env` points to it. The reference runs used
+revision `d7cb1a3960b79dd3e20d4990b83005e96e1bcd9d`. On a login node:
+
+```bash
+hf download nyu-visionx/VSI-Bench --repo-type dataset \
+  --revision d7cb1a3960b79dd3e20d4990b83005e96e1bcd9d --local-dir "$SR_VSIBENCH"
+cd "$SR_VSIBENCH" && for z in arkitscenes scannet scannetpp; do unzip -q $z.zip; done
+```
+
+Expected layout: `$SR_VSIBENCH/README.md` (it defines the `full` config), `test*.parquet`, and
+`{arkitscenes,scannet,scannetpp}/<scene>.mp4` (512 videos). The eval loads
+`load_dataset($SR_VSIBENCH, "full")`, which gives 5,130 questions in the hub's order.
+`verify_data.sh` checks all of this.
+
 ## Layout
 
 ```
-configs/<exp>.env          one per experiment: cache, mix, model/fusion flags, train + eval flags
-configs/caches/<c>.env     one per VGGT cache: backbone, weights, frame mode, resolution / layers
+configs/<exp>.env          one per experiment: VGGT backbone/input, mix, model/fusion, train + eval flags
+data/*.jsonl.gz            the two training mixes (video paths relative to SR_VSI590K)
 sr_vggt/                   the Python package
-  model.py                 Qwen3-VL + Perceiver placeholder scatter (core); fusion hooks
-  data.py                  mix rows, det_es frames, prompts, collator
-  encoders.py              VGGT backbones, preprocessing, token extraction (export + eval)
-  vggt_cache.py            the per-clip safetensors cache and its parameter guard
-  train.py eval.py export.py verify.py merge_eval.py metrics.py config.py
-  ablations/               spatialstack.py, vlm3r.py (own fusion modules), vggt1b/ (vendored VGGT-1B)
-  extensions/reasoning.py  reasoning-trace system prompt, length filter, init-from-checkpoint, answer parsing
-scripts/                   setup_env, download_weights, unpack_data, export_vggt, verify_data,
-                           train, eval, pack_data (data owner only); jobs/*.slurm bodies; lib.sh
-tests/parity.py            how this code was checked against the original experiment code
+  model.py                 Qwen3-VL + live frozen VGGT + Perceiver placeholder scatter; fusion hooks
+  data.py                  mix rows, prompts, collator (decodes videos, builds Qwen + VGGT inputs)
+  encoders.py              frame sampling, VGGT backbones and their input preprocessing
+  train.py eval.py verify.py merge_eval.py metrics.py config.py
+  ablations/               spatialstack.py, vlm3r.py (own fusion modules)
+  extensions/reasoning.py  reasoning-trace prompt, length filter, init-from-checkpoint, answer parsing
+third_party/               vendored perceiver-io @46c6325, vggt-omega @39a0cb8, VGGT-1B (licenses inside)
+scripts/                   setup_env, download_weights, verify_data, train, eval; jobs/*.slurm; lib.sh
+tests/                     test_cpu.py (CPU checks), parity.py (GPU: eval vs the original code)
 ```
 
-How data flows: every training row names a VSI-590K clip. Qwen gets that clip's 64 det_es
-JPEGs. These are posed frames, stored already at the 128 tok/frame size. The VGGT branch reads
-the same clip's tokens from the cache, which `export_vggt.sh` built from those same JPEGs. At eval
-time, VSI-Bench clips are decoded from mp4 at 1 fps (at most 64 frames), and VGGT runs live on
-them with the same preprocessing.
-
-Paths come only from `site.env` and the configs. Cache entries are keyed by the clip's resolved
-absolute path and stamped with the VGGT weight path. If you move `SR_DATA` or `SR_HF_HOME` after
-exporting, every entry goes stale. The loader then raises an error; it never silently recomputes.
+Train and eval build inputs with the same functions (`encoders.decode_video_frames`,
+`data.clip_inputs`), so a clip looks the same to the model in both. Paths come only from
+`site.env`.

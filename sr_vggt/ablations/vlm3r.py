@@ -18,15 +18,6 @@ from torch import nn
 from ..model import Qwen3VLWithVggtForConditionalGeneration, Qwen3VLWithVggtModel
 
 
-def z3d(cached) -> torch.Tensor:
-    """``{patch [T, Np, d], camera [T, 17, d]}`` -> ``Z_3D [T, 1 + Np, d]`` in bf16."""
-    return torch.cat([cached["camera"][:, :1], cached["patch"]], dim=1).to(torch.bfloat16)
-
-
-def batch_vggt(cached, batch):
-    return {"vggt_tokens": [z3d(c) for c in cached]}
-
-
 class VggtCrossAttentionFusion(nn.Module):
     def __init__(self, d_visual: int, d_spatial: int, d_attn: int, num_heads: int = 16,
                  dropout: float = 0.1) -> None:
@@ -55,6 +46,14 @@ class VggtCrossAttentionFusion(nn.Module):
 
 
 class Vlm3rModel(Qwen3VLWithVggtModel):
+    def vggt_features(self, raw_videos) -> dict:
+        """Per clip ``Z_3D [T, 1 + Np, d]``: last-layer camera token + patch tokens."""
+        out = []
+        for video in raw_videos:
+            tokens, ps = self.run_vggt(video)
+            out.append(torch.cat([tokens[-1][:, :1], tokens[-1][:, ps:]], dim=1))
+        return {"vggt_tokens": out}
+
     def initialize_projector(self, vggt_embed_dim: int, fusion_num_heads: int = 16,
                              fusion_dropout: float = 0.1) -> None:
         hidden = int(self.config.text_config.hidden_size)

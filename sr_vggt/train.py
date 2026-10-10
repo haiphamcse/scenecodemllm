@@ -1,10 +1,10 @@
-"""Qwen3-VL LoRA SFT with cached VGGT features on det_es frames.
+"""Qwen3-VL LoRA SFT with a frozen VGGT encoder run live on the decoded VSI-590K clips.
 
     accelerate launch -m sr_vggt.train <configs/*.env flags> --jsonl_path <mix> \
-        --data_root <VSI-590K root> --vggt_cache_root <cache dir> --output_dir <run dir> ...
+        --data_root <VSI-590K root> --output_dir <run dir> ...
 
 scripts/train.sh builds this command from an experiment config.
-Trainable: the VGGT module (``vggt_projector``) + LoRA on the LLM.
+Trainable: the VGGT fusion module (``vggt_projector``) + LoRA on the LLM; VGGT itself is frozen.
 """
 
 from __future__ import annotations
@@ -40,9 +40,8 @@ class ModelArguments:
 
 @dataclass
 class DataArguments:
-    jsonl_path: str = field(default="", metadata={"help": "Training mix jsonl (VQA rows)."})
-    data_root: str = field(default="", metadata={"help": "Root for relative `video` paths."})
-    vggt_cache_root: str = field(default="", metadata={"help": "This experiment's VGGT cache dir."})
+    jsonl_path: str = field(default="", metadata={"help": "Training mix (.jsonl or .jsonl.gz, VQA rows)."})
+    data_root: str = field(default="", metadata={"help": "VSI-590K root (the rows' `video` paths are relative to it)."})
     max_seq_len: int = field(default=0, metadata={"help": "Drop rows longer than this (0 = keep all)."})
     init_from_checkpoint: str = field(default="", metadata={"help": "First window only: start from "
                                       "this checkpoint's adapter (LoRA + vggt_projector), fresh optimizer."})
@@ -78,8 +77,8 @@ class CpuBatchSFTTrainer(SFTTrainer):
         """Keep micro-batches on the CPU until their own training_step.
 
         Trainer.get_batch_samples pulls the whole accumulation window before running any of it;
-        a device-placed loader parks all of it (with ~70-300 MB of cached VGGT features per
-        sample) on the GPU and OOMs. Without device placement, _prepare_inputs moves one batch
+        a device-placed loader parks all of it (with ~50-75 MB of raw VGGT input per sample)
+        on the GPU and OOMs. Without device placement, _prepare_inputs moves one batch
         at a time.
         """
         placement = self.accelerator.device_placement
@@ -114,20 +113,15 @@ def main() -> None:
     parser = HfArgumentParser((ModelArguments, DataArguments, cfg.VggtArguments, SFTConfig))
     model_args, data_args, vggt_args, training_args = parser.parse_args_into_dataclasses()
 
-    if not Path(data_args.vggt_cache_root).is_dir():
-        raise NotADirectoryError(f"--vggt_cache_root {data_args.vggt_cache_root!r} missing; "
-                                 "run scripts/export_vggt.sh first.")
     output_dir = Path(training_args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     data_root = Path(data_args.data_root) if data_args.data_root else None
-    frame_ph, camera_ph = vggt_args.placeholder_texts()
 
     rows = load_mix(data_args.jsonl_path)
     processor = AutoProcessor.from_pretrained(model_args.model_name_or_path, trust_remote_code=True)
     if data_args.max_seq_len:
         from .extensions.reasoning import kept_rows
-        kept = kept_rows(rows, data_args.max_seq_len, output_dir, processor, data_root,
-                         vggt_args.prompt, frame_ph, camera_ph, vggt_args.image_patch_size)
+        kept = kept_rows(rows, data_args.max_seq_len, output_dir, processor, data_root, vggt_args)
         rows = [rows[i] for i in kept]
     train_dataset = to_dataset(rows)
     logging.info("Train rows: %d", len(rows))
@@ -139,7 +133,7 @@ def main() -> None:
         attn_implementation=model_args.attn_implementation,
         dtype=torch.bfloat16 if training_args.bf16 else None,
     )
-    cfg.initialize_projector(model, vggt_args, processor.tokenizer)
+    cfg.initialize_vggt_modules(model, vggt_args, processor.tokenizer)
 
     training_args.eval_strategy = "no"
     training_args.dataset_kwargs = {"skip_prepare_dataset": True}
@@ -147,12 +141,7 @@ def main() -> None:
     if training_args.logging_dir is None:
         training_args.logging_dir = str(output_dir / "tensorboard")
 
-    collator = make_collator(
-        processor, data_root=data_root, prompt=vggt_args.prompt,
-        frame_placeholder_text=frame_ph, camera_placeholder_text=camera_ph,
-        vggt_cache_root=data_args.vggt_cache_root, cache_params=vggt_args.cache_params(),
-        batch_vggt=cfg.batch_vggt_fn(vggt_args), image_patch_size=vggt_args.image_patch_size,
-    )
+    collator = make_collator(processor, data_root, vggt_args)
 
     # "latest": resume from the newest checkpoint if one exists, else start fresh.
     resume_ckpt = training_args.resume_from_checkpoint
