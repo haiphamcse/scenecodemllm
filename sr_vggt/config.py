@@ -15,11 +15,11 @@ ARCHS = ("perceiver", "spatialstack", "vlm3r")
 class VggtArguments:
     # --- architecture / prompt ---
     arch: str = field(default="perceiver", metadata={"help": f"One of {ARCHS}."})
-    prompt: str = field(default="text256", metadata={"help": "text256 | clean | plain | reason (data.py)."})
+    prompt: str = field(default="clean", metadata={"help": "text256 | clean | plain | reason (data.py)."})
     # --- VGGT features (= the cache recipe; configs/caches/*.env) ---
     vggt_backbone: str = field(default="omega", metadata={"help": "omega | vggt1b"})
     vggt_repo: str = field(default="facebook/VGGT-Omega")
-    vggt_file: str = field(default="vggt_omega_1b_256_text.pt")
+    vggt_file: str = field(default="vggt_omega_1b_512.pt")
     vggt_revision: str = field(default="", metadata={"help": "HF snapshot sha (default: main)."})
     vggt_checkpoint: str = field(default="", metadata={"help": "Explicit weight path; default: "
                                  "<vggt_repo>/<vggt_file> resolved inside HF_HOME."})

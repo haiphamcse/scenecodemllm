@@ -1,5 +1,5 @@
 """Qwen3-VL + VGGT features. Core architecture: two Perceiver IO encoders whose latents are
-scattered into placeholder tokens (the main experiment and its config-only ablations).
+scattered into placeholder tokens (main and the Perceiver ablations).
 
 - Qwen3-VL encodes the video as usual (``pixel_values_videos`` -> video tokens).
 - The batch carries the clip's VGGT tokens: ``vggt_patch_tokens`` ``[T, Np, d]`` and

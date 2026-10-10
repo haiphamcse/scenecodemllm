@@ -36,8 +36,10 @@ _P512 = dict(frame_num_latents=512, camera_num_latents=32, frame_widening_factor
 _EV_P = ["--frame_num_latents", "512", "--camera_num_latents", "32", "--frame_widening_factor", "2",
          "--vggt_image_resolution", "256", "--video_fps", "1.0", "--video_max_frames", "64"]
 OLD = {
-    "main": dict(fork="idea_3i_190k_es_64f_lat512_text256", kind="perceiver", proj=_P512,
-                 cache="vggt_cache_256_64f_es_text", mix="190k", ev=_EV_P),
+    "main": dict(fork="idea_3i_190k_es_64f_lat512_clean", kind="perceiver", proj=_P512,
+                 cache="vggt_cache_256_64f_es", mix="190k", ev=_EV_P),
+    "text256": dict(fork="idea_3i_190k_es_64f_lat512_text256", kind="perceiver", proj=_P512,
+                    cache="vggt_cache_256_64f_es_text", mix="190k", ev=_EV_P),
     "4b": dict(fork="idea_3i_190k_es_64f_lat512_text256_4b", kind="perceiver", proj=_P512,
                cache="vggt_cache_256_64f_es_text", mix="190k", ev=_EV_P, model="Qwen/Qwen3-VL-4B-Instruct"),
     "lat3072": dict(fork="idea_3i_190k_es_64f_lat3072_text256", kind="perceiver",

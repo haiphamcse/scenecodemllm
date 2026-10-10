@@ -1,13 +1,14 @@
 # sr_vggt
 
 Spatial-reasoning finetuning of Qwen3-VL with geometry features from a frozen VGGT model, trained
-and evaluated on the IDRIS Jean Zay cluster. The main model reaches 0.606 on VSI-Bench (full split)
-at 2B and 0.678 at 4B. [EXPERIMENTS.md](EXPERIMENTS.md) lists every configuration and the scores
+and evaluated on the IDRIS Jean Zay cluster. The main model reaches 0.600 on VSI-Bench (full split).
+The best ablations reach 0.621 (SpatialStack fusion, 2B) and 0.678 (4B). [EXPERIMENTS.md](EXPERIMENTS.md) lists every configuration and the scores
 to reproduce. [CLUSTER_NOTES.md](CLUSTER_NOTES.md) collects the Jean Zay pitfalls.
 
-**Main model.** Qwen3-VL-2B sees 64 RGB frames per clip (128 tokens per frame). VGGT-Omega encodes
-the same frames. Two Perceiver IO encoders compress its patch tokens into 512 latents and its
-camera tokens into 32 latents. Those latents replace placeholder tokens in the prompt. Training
+**Main model.** Qwen3-VL-2B sees 64 RGB frames per clip (128 tokens per frame). VGGT-Omega
+(1B, 512 checkpoint) encodes the same frames. Two Perceiver IO encoders compress its patch tokens into 512 latents and its
+camera tokens into 32 latents. Those latents replace placeholder tokens in the prompt
+("... This is the 3D scene context."). Training
 uses LoRA (r64) on the LLM plus the Perceivers, for one epoch over a 190k-question mix built
 from VSI-590K and VLM-3R data.
 
@@ -40,8 +41,8 @@ scripts/download_weights.sh
 scripts/unpack_data.sh /path/to/sr_vggt_data.zip
 
 # 4. VGGT feature caches (V100 dev, 10 shards x ~45 min). Rerun after a timeout: it resumes.
-scripts/export_vggt.sh es_text     # main, 4b, lat3072, reason16k
-#   es (lora128, vlm3r), es_ss (spatialstack), es_vggt1b (vggt1b) for the ablations
+scripts/export_vggt.sh es          # main, lora128, vlm3r
+#   es_text (text256, 4b, lat3072, reason16k), es_ss (spatialstack), es_vggt1b (vggt1b)
 
 # 5. Full data check for an experiment (exact counts; exit 0 = ready).
 scripts/verify_data.sh main
@@ -56,9 +57,10 @@ scripts/train.sh main
 scripts/eval.sh main $SCRATCH/sr_vggt_results/sr_vggt_main/checkpoint-743
 ```
 
-`<experiment>` is any `configs/<name>.env`: `main 4b lat3072 lora128 vggt1b spatialstack vlm3r
-reason16k`. `reason16k` starts from `sr_vggt_main/checkpoint-743`, so train `main` first. To
-start from another checkpoint, set `INIT_CKPT=<dir>`.
+`<experiment>` is any `configs/<name>.env`: `main lora128 text256 4b lat3072 vggt1b spatialstack
+vlm3r reason16k`. `reason16k` extends the text256 ablation and starts from
+`sr_vggt_text256/checkpoint-743`, so train `text256` first. To start from another checkpoint,
+set `INIT_CKPT=<dir>`.
 
 ## Layout
 

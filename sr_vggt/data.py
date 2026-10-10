@@ -37,8 +37,8 @@ _TEXT256_SYSTEM = ("You are a spatial reasoning assistant. You are given three i
                    "the scene.")
 
 # --prompt: the system prompt + how the VGGT placeholders are laid out before the video.
-#   text256  named placeholder blocks (main run and its config-only ablations)
-#   clean    bare placeholders + "This is the 3D scene context." (lora128)
+#   clean    bare placeholders + "This is the 3D scene context." (main, lora128)
+#   text256  named placeholder blocks (text256, 4b, lat3072, vggt1b)
 #   plain    no placeholders (spatialstack, vlm3r: geometry enters through the video tokens)
 #   reason   text256 + reasoning-format instructions (extensions/reasoning.py)
 PROMPTS = ("text256", "clean", "plain", "reason")
