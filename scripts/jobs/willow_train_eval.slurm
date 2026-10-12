@@ -2,6 +2,7 @@
 #SBATCH --job-name=sr_vggt_willow
 #SBATCH --partition=willow
 #SBATCH --account=willow
+#SBATCH --qos=proprietary
 #SBATCH --nodelist=gpu017
 #SBATCH --gres=gpu:h100:2
 #SBATCH --cpus-per-task=32
