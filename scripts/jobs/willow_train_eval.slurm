@@ -3,8 +3,7 @@
 #SBATCH --partition=willow
 #SBATCH --account=willow
 #SBATCH --qos=proprietary
-#SBATCH --nodelist=gpu017
-#SBATCH --gres=gpu:h100:2
+#SBATCH --gres=gpu:2
 #SBATCH --cpus-per-task=32
 #SBATCH --mem=64G
 #SBATCH --time=2-00:00:00
