@@ -26,6 +26,8 @@ declare -A SR_ARCH=([h100]=arch/h100 [a100]=arch/a100)
 # OpenMPI is absent on H100 nodes (libmpi.so.40 at import torch). /etc/profile trips `set -u`.
 activate_env() {
   local kind=$1
+  # Non-JZ sites (e.g. willow): a ready python env, no modules or venvs.
+  if [[ -n "${SR_PYTHON_BIN:-}" ]]; then export PATH="${SR_PYTHON_BIN}:${PATH}"; return; fi
   set +eu; unset MODULEPATH; source /etc/profile >/dev/null 2>&1
   module purge >/dev/null 2>&1
   module load "${SR_ARCH[$kind]}"

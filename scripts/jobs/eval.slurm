@@ -18,4 +18,5 @@ args=(
   --dtype bf16
 )
 [[ -n "${5:-}" ]] && args+=(--num_parts "$5" --part_index "$6")
+[[ -n "${EVAL_MAX_SAMPLES:-}" ]] && args+=(--max_samples "${EVAL_MAX_SAMPLES}")   # smoke only
 python -m sr_vggt.eval "${args[@]}"

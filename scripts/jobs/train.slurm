@@ -10,7 +10,8 @@ OUT=$2
 shift 2
 activate_env h100
 offline
-NGPU=$(nvidia-smi -L | wc -l)
+# Allocated GPUs, not node GPUs: some clusters (willow) show every node GPU to nvidia-smi.
+NGPU=${SLURM_GPUS_ON_NODE:-$(nvidia-smi -L | wc -l)}
 echo "=== ${SLURM_JOB_ID} | ${EXP} | ${NGPU} GPUs | $(hostname) | out ${OUT} ==="
 nvidia-smi topo -m || true   # SYS between the GPUs hangs DDP: resubmit with NCCL_P2P_DISABLE=1
 
