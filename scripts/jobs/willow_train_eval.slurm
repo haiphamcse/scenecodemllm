@@ -5,7 +5,7 @@
 #SBATCH --qos=proprietary
 #SBATCH --gres=gpu:2
 #SBATCH --cpus-per-task=32
-#SBATCH --mem=64G
+#SBATCH --mem=128G
 #SBATCH --time=2-00:00:00
 #SBATCH --output=%x-%j.out
 # Train <experiment> on 2 GPUs in one allocation, then eval the final adapter on VSI-Bench full
