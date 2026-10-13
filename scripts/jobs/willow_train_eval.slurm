@@ -38,7 +38,7 @@ for i in "${!GPUS[@]}"; do
   pids+=($!)
 done
 for p in "${pids[@]}"; do wait "$p"; done
-tail -3 "${EVAL_DIR}".shard*.log
+tail -n 3 "${EVAL_DIR}".shard*.log
 [[ -n "${EVAL_MAX_SAMPLES:-}" ]] && { echo "smoke eval done (no merge)"; exit 0; }
 source scripts/lib.sh && activate_env h100
 python -m sr_vggt.eval merge "${EVAL_DIR}"
