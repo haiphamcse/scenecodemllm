@@ -1,0 +1,225 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>190k Training Mix</title>
+<style>
+:root{color-scheme:light;--bg:#fff;--card:#fff;--ink:#0b0b0b;--ink2:#52514e;--muted:#8a8984;--line:#e6e5e0;
+--s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a;--good:#0ca30c;--crit:#d03b3b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);
+font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:32px 16px 64px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:40px 0 4px}
+.sub{color:var(--ink2);margin:0 0 20px}.note{color:var(--ink2);font-size:14px;margin:4px 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kv{font-size:24px;font-weight:650;font-variant-numeric:tabular-nums}.kl{color:var(--ink2);font-size:13px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stage{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--muted);border-radius:8px;padding:10px 14px}
+.stage.src{border-left-color:var(--s1)}.stage.final{border-left-color:var(--good)}
+.st{font-weight:650}.sn{font-variant-numeric:tabular-nums;color:var(--ink)}.sd{color:var(--ink2);font-size:13.5px}
+.arrow,.merge{text-align:center;color:var(--muted);margin:4px 0}
+.chart{width:100%;height:auto;display:block}.lbl{fill:var(--ink2);font-size:12.5px}
+.val{fill:var(--ink);font-size:12px;font-variant-numeric:tabular-nums}.val.sm{font-size:11px;fill:var(--ink2)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:0 0 8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{color:var(--ink2);font-weight:600}.n{text-align:right;font-variant-numeric:tabular-nums}
+tbody tr:last-child td{border-bottom:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ok{color:var(--good);font-weight:650}.bad{color:var(--crit);font-weight:650}
+.exs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.exh{font-weight:650}.exh span{font-weight:400;color:var(--muted);font-size:12.5px;margin-left:6px}
+pre{white-space:pre-wrap;font:13px/1.45 ui-monospace,Menlo,monospace;color:var(--ink2);margin:6px 0}
+.ans{font-size:13.5px}
+details{margin-top:8px}summary{cursor:pointer;color:var(--ink2);font-size:13px}
+pre.tex{background:#f6f6f4;border:1px solid var(--line);border-radius:6px;padding:10px;color:var(--ink);user-select:all}
+@media (max-width:700px){.pair,.grid2,.exs{grid-template-columns:1fr}}
+</style></head><body><main>
+<h1>190k training mix</h1>
+<p class="sub"><code>vqa_train_190k_es_clean.jsonl</code> — the VQA mix behind every idea_3i/idea_3a 190k run and
+sr_vggt's main experiment. Video QA only, VSI-590K + VLM-3R, ScanNet / ScanNet++ / ARKitScenes clips.</p>
+<div class="kpis"><div class="kpi"><div class="kv">190,000</div><div class="kl">Rows</div></div><div class="kpi"><div class="kv">4,878</div><div class="kl">Videos</div></div><div class="kpi"><div class="kv">10</div><div class="kl">Question types</div></div><div class="kpi"><div class="kv">16</div><div class="kl">Median rows / video</div></div><div class="kpi"><div class="kv">61.2%</div><div class="kl">VSI-590K share</div></div></div>
+
+<h2>How it was built</h2>
+<p class="note">build_mix_180k.py → filter_mix_es.py → build_mix_190k.py, seed 42. Counts from the saved intermediate files.</p>
+<div class="pair"><div class="stage src"><div class="st">VSI-590K</div><div class="sn">590,667 rows</div><div class="sd">374,148 with a video; 288,662 from ScanNet / ScanNet++ / ARKitScenes</div></div><div class="stage src"><div class="st">VLM-3R vsibench_train</div><div class="sn">207,658 rows</div><div class="sd">441 without a VSI-590K clip dropped; 0 unmatched templates</div></div></div><div class="merge">both pools ↓</div><div class="stage"><div class="st">Filter + dedupe</div><div class="sn">ReVSI / VSI-Bench scenes</div><div class="sd">0 rows hit ReVSI, VSI-Bench asserted absent; 115 VLM-3R rows duplicating VSI-590K dropped</div></div><div class="arrow">↓</div><div class="stage"><div class="st">Budgeted draw (180k)</div><div class="sn">179,492 rows</div><div class="sd">per (source, type) budgets, breadth-first over videos: VSI-590K 110,944 + VLM-3R 68,548</div></div><div class="arrow">↓</div><div class="stage"><div class="st">det_es filter</div><div class="sn">178,921 rows</div><div class="sd">-571 rows from 60 ARKitScenes videos without posed det_es frames</div></div><div class="arrow">↓</div><div class="stage"><div class="st">Orientation / pose audit</div><div class="sn">176,812 rows</div><div class="sd">-2,109 rows from 18 scenes (upside-down, sideways, broken poses)</div></div><div class="arrow">↓</div><div class="stage final"><div class="st">Top-up (190k)</div><div class="sn">190,000 rows</div><div class="sd">+13,188 rows: relative direction raised to 35,000; rest spread over cells with spare pool, proportional to their size</div></div>
+
+<h2>Budgets, pools and draws per cell</h2>
+<p class="note">"Pool" = rows available after scene filters and dedupe. Cells at 100% pool use took every row
+(counting, room size, route planning, appearance order).</p>
+<div class="card"><div class="tw"><table><thead><tr><th class="">Source · type</th><th class="n">Budget</th><th class="n">Pool (180k)</th><th class="n">Drawn 180k</th><th class="n">After clean</th><th class="n">Added</th><th class="n">Final 190k</th><th class="n">Pool (190k)</th><th class="n">Pool used</th></tr></thead><tbody><tr><td class="">VSI-590K · Relative direction</td><td class="n">18,000</td><td class="n">100,558</td><td class="n">18,000</td><td class="n">17,754</td><td class="n">1,928</td><td class="n">19,682</td><td class="n">99,216</td><td class="n">20%</td></tr><tr><td class="">VSI-590K · Relative distance</td><td class="n">20,000</td><td class="n">54,097</td><td class="n">20,000</td><td class="n">19,734</td><td class="n">2,128</td><td class="n">21,862</td><td class="n">53,337</td><td class="n">41%</td></tr><tr><td class="">VSI-590K · Absolute distance</td><td class="n">20,000</td><td class="n">29,188</td><td class="n">20,000</td><td class="n">19,720</td><td class="n">2,127</td><td class="n">21,847</td><td class="n">28,753</td><td class="n">76%</td></tr><tr><td class="">VSI-590K · Object size</td><td class="n">16,534</td><td class="n">16,534</td><td class="n">16,534</td><td class="n">16,290</td><td class="n">0</td><td class="n">16,290</td><td class="n">16,290</td><td class="n">100%</td></tr><tr><td class="">VSI-590K · Counting</td><td class="n">9,726</td><td class="n">9,726</td><td class="n">9,726</td><td class="n">9,589</td><td class="n">0</td><td class="n">9,589</td><td class="n">9,589</td><td class="n">100%</td></tr><tr><td class="">VSI-590K · Appearance order</td><td class="n">13,728</td><td class="n">13,728</td><td class="n">13,728</td><td class="n">13,330</td><td class="n">0</td><td class="n">13,330</td><td class="n">13,330</td><td class="n">100%</td></tr><tr><td class="">VSI-590K · Room size</td><td class="n">4,956</td><td class="n">4,956</td><td class="n">4,956</td><td class="n">4,878</td><td class="n">0</td><td class="n">4,878</td><td class="n">4,878</td><td class="n">100%</td></tr><tr><td class="">VSI-590K · Relative size</td><td class="n">5,000</td><td class="n">30,000</td><td class="n">5,000</td><td class="n">4,929</td><td class="n">530</td><td class="n">5,459</td><td class="n">29,594</td><td class="n">18%</td></tr><tr><td class="">VSI-590K · Absolute direction</td><td class="n">3,000</td><td class="n">25,288</td><td class="n">3,000</td><td class="n">2,959</td><td class="n">318</td><td class="n">3,277</td><td class="n">24,936</td><td class="n">13%</td></tr><tr><td class="">VLM-3R · Relative direction</td><td class="n">14,000</td><td class="n">86,441</td><td class="n">14,000</td><td class="n">13,818</td><td class="n">1,500</td><td class="n">15,318</td><td class="n">84,990</td><td class="n">18%</td></tr><tr><td class="">VLM-3R · Relative distance</td><td class="n">16,000</td><td class="n">42,025</td><td class="n">16,000</td><td class="n">15,778</td><td class="n">1,701</td><td class="n">17,479</td><td class="n">41,278</td><td class="n">42%</td></tr><tr><td class="">VLM-3R · Absolute distance</td><td class="n">16,000</td><td class="n">50,757</td><td class="n">16,000</td><td class="n">15,767</td><td class="n">1,700</td><td class="n">17,467</td><td class="n">49,806</td><td class="n">35%</td></tr><tr><td class="">VLM-3R · Object size</td><td class="n">8,000</td><td class="n">12,917</td><td class="n">8,000</td><td class="n">7,910</td><td class="n">852</td><td class="n">8,762</td><td class="n">12,738</td><td class="n">69%</td></tr><tr><td class="">VLM-3R · Counting</td><td class="n">9,000</td><td class="n">9,357</td><td class="n">9,000</td><td class="n">8,846</td><td class="n">347</td><td class="n">9,193</td><td class="n">9,193</td><td class="n">100%</td></tr><tr><td class="">VLM-3R · Room size</td><td class="n">2,000</td><td class="n">2,057</td><td class="n">2,000</td><td class="n">1,983</td><td class="n">57</td><td class="n">2,040</td><td class="n">2,040</td><td class="n">100%</td></tr><tr><td class="">VLM-3R · Route planning</td><td class="n">3,663</td><td class="n">3,548</td><td class="n">3,548</td><td class="n">3,527</td><td class="n">0</td><td class="n">3,527</td><td class="n">3,527</td><td class="n">100%</td></tr><tr><td class="">Total</td><td class="n">179,607</td><td class="n"></td><td class="n">179,492</td><td class="n">176,812</td><td class="n">13,188</td><td class="n">190,000</td><td class="n"></td><td class="n"></td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrrrrrrrr}
+\toprule
+Source / type &amp; Budget &amp; Pool (180k) &amp; Drawn 180k &amp; After clean &amp; Added &amp; Final 190k &amp; Pool (190k) &amp; Pool used \\
+\midrule
+VSI-590K / Relative direction &amp; 18,000 &amp; 100,558 &amp; 18,000 &amp; 17,754 &amp; 1,928 &amp; 19,682 &amp; 99,216 &amp; 20\% \\
+VSI-590K / Relative distance &amp; 20,000 &amp; 54,097 &amp; 20,000 &amp; 19,734 &amp; 2,128 &amp; 21,862 &amp; 53,337 &amp; 41\% \\
+VSI-590K / Absolute distance &amp; 20,000 &amp; 29,188 &amp; 20,000 &amp; 19,720 &amp; 2,127 &amp; 21,847 &amp; 28,753 &amp; 76\% \\
+VSI-590K / Object size &amp; 16,534 &amp; 16,534 &amp; 16,534 &amp; 16,290 &amp; 0 &amp; 16,290 &amp; 16,290 &amp; 100\% \\
+VSI-590K / Counting &amp; 9,726 &amp; 9,726 &amp; 9,726 &amp; 9,589 &amp; 0 &amp; 9,589 &amp; 9,589 &amp; 100\% \\
+VSI-590K / Appearance order &amp; 13,728 &amp; 13,728 &amp; 13,728 &amp; 13,330 &amp; 0 &amp; 13,330 &amp; 13,330 &amp; 100\% \\
+VSI-590K / Room size &amp; 4,956 &amp; 4,956 &amp; 4,956 &amp; 4,878 &amp; 0 &amp; 4,878 &amp; 4,878 &amp; 100\% \\
+VSI-590K / Relative size &amp; 5,000 &amp; 30,000 &amp; 5,000 &amp; 4,929 &amp; 530 &amp; 5,459 &amp; 29,594 &amp; 18\% \\
+VSI-590K / Absolute direction &amp; 3,000 &amp; 25,288 &amp; 3,000 &amp; 2,959 &amp; 318 &amp; 3,277 &amp; 24,936 &amp; 13\% \\
+VLM-3R / Relative direction &amp; 14,000 &amp; 86,441 &amp; 14,000 &amp; 13,818 &amp; 1,500 &amp; 15,318 &amp; 84,990 &amp; 18\% \\
+VLM-3R / Relative distance &amp; 16,000 &amp; 42,025 &amp; 16,000 &amp; 15,778 &amp; 1,701 &amp; 17,479 &amp; 41,278 &amp; 42\% \\
+VLM-3R / Absolute distance &amp; 16,000 &amp; 50,757 &amp; 16,000 &amp; 15,767 &amp; 1,700 &amp; 17,467 &amp; 49,806 &amp; 35\% \\
+VLM-3R / Object size &amp; 8,000 &amp; 12,917 &amp; 8,000 &amp; 7,910 &amp; 852 &amp; 8,762 &amp; 12,738 &amp; 69\% \\
+VLM-3R / Counting &amp; 9,000 &amp; 9,357 &amp; 9,000 &amp; 8,846 &amp; 347 &amp; 9,193 &amp; 9,193 &amp; 100\% \\
+VLM-3R / Room size &amp; 2,000 &amp; 2,057 &amp; 2,000 &amp; 1,983 &amp; 57 &amp; 2,040 &amp; 2,040 &amp; 100\% \\
+VLM-3R / Route planning &amp; 3,663 &amp; 3,548 &amp; 3,548 &amp; 3,527 &amp; 0 &amp; 3,527 &amp; 3,527 &amp; 100\% \\
+Total &amp; 179,607 &amp;  &amp; 179,492 &amp; 176,812 &amp; 13,188 &amp; 190,000 &amp;  &amp;  \\
+\bottomrule
+\end{tabular}</pre></details></div>
+
+<h2>Composition by question type</h2>
+<div class="grid2"><div class="card"><div class="legend"><span><i style="background:var(--s1)"></i>VSI-590K</span><span><i style="background:var(--s2)"></i>VLM-3R</span></div><svg viewBox="0 0 640 268" class="chart" role="img"><text x="142" y="21.0" text-anchor="end" class="lbl">Relative direction</text><rect x="150.0" y="8" width="208.1" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 19,682</title></rect><rect x="360.1" y="8" width="163.5" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 15,318</title></rect><text x="529.7" y="21.0" class="val">35,000</text><text x="142" y="47.0" text-anchor="end" class="lbl">Relative distance</text><rect x="150.0" y="34" width="231.4" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 21,862</title></rect><rect x="383.4" y="34" width="186.6" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 17,479</title></rect><text x="576.0" y="47.0" class="val">39,341</text><text x="142" y="73.0" text-anchor="end" class="lbl">Absolute distance</text><rect x="150.0" y="60" width="231.2" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 21,847</title></rect><rect x="383.2" y="60" width="186.5" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 17,467</title></rect><text x="575.7" y="73.0" class="val">39,314</text><text x="142" y="99.0" text-anchor="end" class="lbl">Object size</text><rect x="150.0" y="86" width="171.9" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 16,290</title></rect><rect x="323.9" y="86" width="93.5" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 8,762</title></rect><text x="423.5" y="99.0" class="val">25,052</text><text x="142" y="125.0" text-anchor="end" class="lbl">Counting</text><rect x="150.0" y="112" width="100.4" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 9,589</title></rect><rect x="252.4" y="112" width="98.1" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 9,193</title></rect><text x="356.5" y="125.0" class="val">18,782</text><text x="142" y="151.0" text-anchor="end" class="lbl">Appearance order</text><rect x="150.0" y="138" width="140.3" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 13,330</title></rect><text x="298.3" y="151.0" class="val">13,330</text><text x="142" y="177.0" text-anchor="end" class="lbl">Room size</text><rect x="150.0" y="164" width="50.1" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 4,878</title></rect><rect x="202.1" y="164" width="21.8" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 2,040</title></rect><text x="229.9" y="177.0" class="val">6,918</text><text x="142" y="203.0" text-anchor="end" class="lbl">Relative size</text><rect x="150.0" y="190" width="56.3" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 5,459</title></rect><text x="214.3" y="203.0" class="val">5,459</text><text x="142" y="229.0" text-anchor="end" class="lbl">Route planning</text><rect x="150.0" y="216" width="37.7" height="16" rx="2" fill="var(--s2)"><title>VLM-3R: 3,527</title></rect><text x="193.7" y="229.0" class="val">3,527</text><text x="142" y="255.0" text-anchor="end" class="lbl">Absolute direction</text><rect x="150.0" y="242" width="33.0" height="16" rx="2" fill="var(--s1)"><title>VSI-590K: 3,277</title></rect><text x="191.0" y="255.0" class="val">3,277</text></svg></div>
+<div class="card"><div class="legend"><span><i style="background:var(--s1)"></i>ScanNet++</span><span><i style="background:var(--s2)"></i>ScanNet</span><span><i style="background:var(--s3)"></i>ARKitScenes</span></div><svg viewBox="0 0 640 268" class="chart" role="img"><text x="142" y="21.0" text-anchor="end" class="lbl">Relative direction</text><rect x="150.0" y="8" width="161.3" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 15,300</title></rect><rect x="313.3" y="8" width="131.6" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 12,512</title></rect><rect x="446.9" y="8" width="76.7" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 7,188</title></rect><text x="529.7" y="21.0" class="val">35,000</text><text x="142" y="47.0" text-anchor="end" class="lbl">Relative distance</text><rect x="150.0" y="34" width="229.8" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 21,715</title></rect><rect x="381.8" y="34" width="142.2" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 13,508</title></rect><rect x="526.0" y="34" width="44.0" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 4,118</title></rect><text x="576.0" y="47.0" class="val">39,341</text><text x="142" y="73.0" text-anchor="end" class="lbl">Absolute distance</text><rect x="150.0" y="60" width="219.2" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 20,720</title></rect><rect x="371.2" y="60" width="130.8" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 12,440</title></rect><rect x="504.0" y="60" width="65.7" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 6,154</title></rect><text x="575.7" y="73.0" class="val">39,314</text><text x="142" y="99.0" text-anchor="end" class="lbl">Object size</text><rect x="150.0" y="86" width="102.2" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 9,756</title></rect><rect x="254.2" y="86" width="88.7" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 8,498</title></rect><rect x="344.9" y="86" width="72.6" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 6,798</title></rect><text x="423.5" y="99.0" class="val">25,052</text><text x="142" y="125.0" text-anchor="end" class="lbl">Counting</text><rect x="150.0" y="112" width="105.2" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 10,043</title></rect><rect x="257.2" y="112" width="56.7" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 5,499</title></rect><rect x="315.9" y="112" width="34.6" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 3,240</title></rect><text x="356.5" y="125.0" class="val">18,782</text><text x="142" y="151.0" text-anchor="end" class="lbl">Appearance order</text><rect x="150.0" y="138" width="99.5" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 9,511</title></rect><rect x="251.5" y="138" width="38.8" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 3,819</title></rect><text x="298.3" y="151.0" class="val">13,330</text><text x="142" y="177.0" text-anchor="end" class="lbl">Room size</text><rect x="150.0" y="164" width="15.9" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 1,678</title></rect><rect x="167.9" y="164" width="23.6" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 2,402</title></rect><rect x="193.6" y="164" width="30.3" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 2,838</title></rect><text x="229.9" y="177.0" class="val">6,918</text><text x="142" y="203.0" text-anchor="end" class="lbl">Relative size</text><rect x="150.0" y="190" width="10.1" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 1,131</title></rect><rect x="162.1" y="190" width="13.8" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 1,478</title></rect><rect x="177.9" y="190" width="30.4" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 2,850</title></rect><text x="214.3" y="203.0" class="val">5,459</text><text x="142" y="229.0" text-anchor="end" class="lbl">Route planning</text><rect x="150.0" y="216" width="4.9" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 645</title></rect><rect x="156.9" y="216" width="19.5" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 2,012</title></rect><rect x="178.4" y="216" width="9.3" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 870</title></rect><text x="193.7" y="229.0" class="val">3,527</text><text x="142" y="255.0" text-anchor="end" class="lbl">Absolute direction</text><rect x="150.0" y="242" width="8.9" height="16" rx="2" fill="var(--s1)"><title>ScanNet++: 1,025</title></rect><rect x="160.9" y="242" width="8.3" height="16" rx="2" fill="var(--s2)"><title>ScanNet: 966</title></rect><rect x="171.3" y="242" width="13.7" height="16" rx="2" fill="var(--s3)"><title>ARKitScenes: 1,286</title></rect><text x="191.0" y="255.0" class="val">3,277</text></svg></div></div>
+<div class="card" style="margin-top:12px"><div class="tw"><table><thead><tr><th class="">Dataset</th><th class="n">Rows</th><th class="n">Share</th><th class="n">Videos</th><th class="n">Rows / video</th></tr></thead><tbody><tr><td class="">ScanNet++</td><td class="n">91,524</td><td class="n">48.2%</td><td class="n">839</td><td class="n">109.1</td></tr><tr><td class="">ScanNet</td><td class="n">63,134</td><td class="n">33.2%</td><td class="n">1,201</td><td class="n">52.6</td></tr><tr><td class="">ARKitScenes</td><td class="n">35,342</td><td class="n">18.6%</td><td class="n">2,838</td><td class="n">12.5</td></tr><tr><td class="">All</td><td class="n">190,000</td><td class="n">100%</td><td class="n">4,878</td><td class="n">39.0</td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrrrr}
+\toprule
+Dataset &amp; Rows &amp; Share &amp; Videos &amp; Rows / video \\
+\midrule
+ScanNet++ &amp; 91,524 &amp; 48.2\% &amp; 839 &amp; 109.1 \\
+ScanNet &amp; 63,134 &amp; 33.2\% &amp; 1,201 &amp; 52.6 \\
+ARKitScenes &amp; 35,342 &amp; 18.6\% &amp; 2,838 &amp; 12.5 \\
+All &amp; 190,000 &amp; 100\% &amp; 4,878 &amp; 39.0 \\
+\bottomrule
+\end{tabular}</pre></details></div>
+
+<h2>Type mix vs VSI-Bench</h2>
+<p class="note">Share of rows per type: 190k mix vs VSI-Bench full (5,130 questions; its three relative-direction
+levels pooled). Absolute direction and relative size exist only in training.</p>
+<div class="card"><div class="legend"><span><i style="background:var(--s1)"></i>190k mix</span><span><i style="background:var(--s3)"></i>VSI-Bench</span></div><svg viewBox="0 0 640 348" class="chart" role="img"><text x="142" y="25.0" text-anchor="end" class="lbl">Relative direction</text><rect x="150" y="7" width="373.7" height="12" rx="2" fill="var(--s1)"><title>190k mix: 18.4%</title></rect><text x="529.7" y="17" class="val sm">18.4%</text><rect x="150" y="21" width="382.8" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 18.9%</title></rect><text x="538.8" y="31" class="val sm">18.9%</text><text x="142" y="59.0" text-anchor="end" class="lbl">Relative distance</text><rect x="150" y="41" width="420.0" height="12" rx="2" fill="var(--s1)"><title>190k mix: 20.7%</title></rect><text x="576.0" y="51" class="val sm">20.7%</text><rect x="150" y="55" width="280.7" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 13.8%</title></rect><text x="436.7" y="65" class="val sm">13.8%</text><text x="142" y="93.0" text-anchor="end" class="lbl">Absolute distance</text><rect x="150" y="75" width="419.7" height="12" rx="2" fill="var(--s1)"><title>190k mix: 20.7%</title></rect><text x="575.7" y="85" class="val sm">20.7%</text><rect x="150" y="89" width="329.8" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 16.3%</title></rect><text x="485.8" y="99" class="val sm">16.3%</text><text x="142" y="127.0" text-anchor="end" class="lbl">Object size</text><rect x="150" y="109" width="267.5" height="12" rx="2" fill="var(--s1)"><title>190k mix: 13.2%</title></rect><text x="423.5" y="119" class="val sm">13.2%</text><rect x="150" y="123" width="376.8" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 18.6%</title></rect><text x="532.8" y="133" class="val sm">18.6%</text><text x="142" y="161.0" text-anchor="end" class="lbl">Counting</text><rect x="150" y="143" width="200.5" height="12" rx="2" fill="var(--s1)"><title>190k mix: 9.9%</title></rect><text x="356.5" y="153" class="val sm">9.9%</text><rect x="150" y="157" width="223.4" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 11.0%</title></rect><text x="379.4" y="167" class="val sm">11.0%</text><text x="142" y="195.0" text-anchor="end" class="lbl">Appearance order</text><rect x="150" y="177" width="142.3" height="12" rx="2" fill="var(--s1)"><title>190k mix: 7.0%</title></rect><text x="298.3" y="187" class="val sm">7.0%</text><rect x="150" y="191" width="244.4" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 12.0%</title></rect><text x="400.4" y="201" class="val sm">12.0%</text><text x="142" y="229.0" text-anchor="end" class="lbl">Room size</text><rect x="150" y="211" width="73.9" height="12" rx="2" fill="var(--s1)"><title>190k mix: 3.6%</title></rect><text x="229.9" y="221" class="val sm">3.6%</text><rect x="150" y="225" width="113.9" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 5.6%</title></rect><text x="269.9" y="235" class="val sm">5.6%</text><text x="142" y="263.0" text-anchor="end" class="lbl">Relative size</text><rect x="150" y="245" width="58.3" height="12" rx="2" fill="var(--s1)"><title>190k mix: 2.9%</title></rect><text x="214.3" y="255" class="val sm">2.9%</text><text x="156.0" y="269" class="val sm">0.0%</text><text x="142" y="297.0" text-anchor="end" class="lbl">Route planning</text><rect x="150" y="279" width="37.7" height="12" rx="2" fill="var(--s1)"><title>190k mix: 1.9%</title></rect><text x="193.7" y="289" class="val sm">1.9%</text><rect x="150" y="293" width="76.7" height="12" rx="2" fill="var(--s3)"><title>VSI-Bench: 3.8%</title></rect><text x="232.7" y="303" class="val sm">3.8%</text><text x="142" y="331.0" text-anchor="end" class="lbl">Absolute direction</text><rect x="150" y="313" width="35.0" height="12" rx="2" fill="var(--s1)"><title>190k mix: 1.7%</title></rect><text x="191.0" y="323" class="val sm">1.7%</text><text x="156.0" y="337" class="val sm">0.0%</text></svg></div>
+
+<h2>Rows per video</h2>
+<p class="note">4,878 videos; min 1, median 16, max 211 rows.
+Draws are breadth-first over videos, so every video in a cell's pool keeps at least one row before any gets a second.</p>
+<div class="card"><svg viewBox="0 0 640 268" class="chart" role="img"><text x="72" y="21.0" text-anchor="end" class="lbl">1–5</text><rect x="80.0" y="8" width="479.6" height="16" rx="2" fill="var(--s1)"><title>1,018 videos</title></rect><text x="565.6" y="21.0" class="val">1,018</text><text x="72" y="47.0" text-anchor="end" class="lbl">6–10</text><rect x="80.0" y="34" width="490.0" height="16" rx="2" fill="var(--s1)"><title>1,040 videos</title></rect><text x="576.0" y="47.0" class="val">1,040</text><text x="72" y="73.0" text-anchor="end" class="lbl">11–20</text><rect x="80.0" y="60" width="324.6" height="16" rx="2" fill="var(--s1)"><title>689 videos</title></rect><text x="410.6" y="73.0" class="val">689</text><text x="72" y="99.0" text-anchor="end" class="lbl">21–30</text><rect x="80.0" y="86" width="210.1" height="16" rx="2" fill="var(--s1)"><title>446 videos</title></rect><text x="296.1" y="99.0" class="val">446</text><text x="72" y="125.0" text-anchor="end" class="lbl">31–40</text><rect x="80.0" y="112" width="107.9" height="16" rx="2" fill="var(--s1)"><title>229 videos</title></rect><text x="193.9" y="125.0" class="val">229</text><text x="72" y="151.0" text-anchor="end" class="lbl">41–50</text><rect x="80.0" y="138" width="93.3" height="16" rx="2" fill="var(--s1)"><title>198 videos</title></rect><text x="179.3" y="151.0" class="val">198</text><text x="72" y="177.0" text-anchor="end" class="lbl">51–60</text><rect x="80.0" y="164" width="57.0" height="16" rx="2" fill="var(--s1)"><title>121 videos</title></rect><text x="143.0" y="177.0" class="val">121</text><text x="72" y="203.0" text-anchor="end" class="lbl">61–80</text><rect x="80.0" y="190" width="87.6" height="16" rx="2" fill="var(--s1)"><title>186 videos</title></rect><text x="173.6" y="203.0" class="val">186</text><text x="72" y="229.0" text-anchor="end" class="lbl">81–120</text><rect x="80.0" y="216" width="239.8" height="16" rx="2" fill="var(--s1)"><title>509 videos</title></rect><text x="325.8" y="229.0" class="val">509</text><text x="72" y="255.0" text-anchor="end" class="lbl">121+</text><rect x="80.0" y="242" width="208.2" height="16" rx="2" fill="var(--s1)"><title>442 videos</title></rect><text x="294.2" y="255.0" class="val">442</text></svg></div>
+
+<h2>Answers</h2>
+<p class="note">Multiple-choice letter balance (a skew lets a model guess by position):</p>
+<div class="card"><div class="tw"><table><thead><tr><th class="">Type</th><th class="n">Rows</th><th class="n">A</th><th class="n">B</th><th class="n">C</th><th class="n">D</th><th class="n">Rows by option count</th></tr></thead><tbody><tr><td class="">Relative direction</td><td class="n">35,000</td><td class="n">36.3%</td><td class="n">36.3%</td><td class="n">19.6%</td><td class="n">7.7%</td><td class="n">2: 11,519, 3: 12,589, 4: 10,892</td></tr><tr><td class="">Relative distance</td><td class="n">39,341</td><td class="n">25.0%</td><td class="n">25.0%</td><td class="n">25.1%</td><td class="n">24.9%</td><td class="n">4: 39,341</td></tr><tr><td class="">Appearance order</td><td class="n">13,330</td><td class="n">25.0%</td><td class="n">24.6%</td><td class="n">25.2%</td><td class="n">25.2%</td><td class="n">4: 13,330</td></tr><tr><td class="">Relative size</td><td class="n">5,459</td><td class="n">50.7%</td><td class="n">49.3%</td><td class="n">0.0%</td><td class="n">0.0%</td><td class="n">2: 5,459</td></tr><tr><td class="">Route planning</td><td class="n">3,527</td><td class="n">33.3%</td><td class="n">31.9%</td><td class="n">34.8%</td><td class="n">0.0%</td><td class="n">3: 3,527</td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrrrrrr}
+\toprule
+Type &amp; Rows &amp; A &amp; B &amp; C &amp; D &amp; Rows by option count \\
+\midrule
+Relative direction &amp; 35,000 &amp; 36.3\% &amp; 36.3\% &amp; 19.6\% &amp; 7.7\% &amp; 2: 11,519, 3: 12,589, 4: 10,892 \\
+Relative distance &amp; 39,341 &amp; 25.0\% &amp; 25.0\% &amp; 25.1\% &amp; 24.9\% &amp; 4: 39,341 \\
+Appearance order &amp; 13,330 &amp; 25.0\% &amp; 24.6\% &amp; 25.2\% &amp; 25.2\% &amp; 4: 13,330 \\
+Relative size &amp; 5,459 &amp; 50.7\% &amp; 49.3\% &amp; 0.0\% &amp; 0.0\% &amp; 2: 5,459 \\
+Route planning &amp; 3,527 &amp; 33.3\% &amp; 31.9\% &amp; 34.8\% &amp; 0.0\% &amp; 3: 3,527 \\
+\bottomrule
+\end{tabular}</pre></details></div>
+<p class="note" style="margin-top:14px">Numeric answers. VSI-590K and VLM-3R use different scales for some types
+(e.g. object size), visible in the ranges:</p>
+<div class="card"><div class="tw"><table><thead><tr><th class="">Source · type</th><th class="n">Rows</th><th class="n">Min</th><th class="n">P10</th><th class="n">Median</th><th class="n">P90</th><th class="n">Max</th></tr></thead><tbody><tr><td class="">VSI-590K · Absolute distance</td><td class="n">21,847</td><td class="n">0.2</td><td class="n">1.2</td><td class="n">14.8</td><td class="n">230</td><td class="n">1490</td></tr><tr><td class="">VLM-3R · Absolute distance</td><td class="n">17,467</td><td class="n">0.4</td><td class="n">0.8</td><td class="n">2.1</td><td class="n">4.5</td><td class="n">22.4</td></tr><tr><td class="">VSI-590K · Object size</td><td class="n">16,290</td><td class="n">0.05</td><td class="n">0.77</td><td class="n">10</td><td class="n">130</td><td class="n">1152</td></tr><tr><td class="">VLM-3R · Object size</td><td class="n">8,762</td><td class="n">4</td><td class="n">21</td><td class="n">82</td><td class="n">216</td><td class="n">1585</td></tr><tr><td class="">VSI-590K · Counting</td><td class="n">9,589</td><td class="n">2</td><td class="n">2</td><td class="n">3</td><td class="n">6</td><td class="n">77</td></tr><tr><td class="">VLM-3R · Counting</td><td class="n">9,193</td><td class="n">2</td><td class="n">2</td><td class="n">3</td><td class="n">7</td><td class="n">98</td></tr><tr><td class="">VSI-590K · Room size</td><td class="n">4,878</td><td class="n">1.6</td><td class="n">11</td><td class="n">53.5</td><td class="n">336</td><td class="n">2582</td></tr><tr><td class="">VLM-3R · Room size</td><td class="n">2,040</td><td class="n">0.8</td><td class="n">6.6</td><td class="n">16.8</td><td class="n">38.2</td><td class="n">324.1</td></tr><tr><td class="">VSI-590K · Absolute direction</td><td class="n">3,277</td><td class="n">0</td><td class="n">25</td><td class="n">190</td><td class="n">335</td><td class="n">357</td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrrrrrr}
+\toprule
+Source / type &amp; Rows &amp; Min &amp; P10 &amp; Median &amp; P90 &amp; Max \\
+\midrule
+VSI-590K / Absolute distance &amp; 21,847 &amp; 0.2 &amp; 1.2 &amp; 14.8 &amp; 230 &amp; 1490 \\
+VLM-3R / Absolute distance &amp; 17,467 &amp; 0.4 &amp; 0.8 &amp; 2.1 &amp; 4.5 &amp; 22.4 \\
+VSI-590K / Object size &amp; 16,290 &amp; 0.05 &amp; 0.77 &amp; 10 &amp; 130 &amp; 1152 \\
+VLM-3R / Object size &amp; 8,762 &amp; 4 &amp; 21 &amp; 82 &amp; 216 &amp; 1585 \\
+VSI-590K / Counting &amp; 9,589 &amp; 2 &amp; 2 &amp; 3 &amp; 6 &amp; 77 \\
+VLM-3R / Counting &amp; 9,193 &amp; 2 &amp; 2 &amp; 3 &amp; 7 &amp; 98 \\
+VSI-590K / Room size &amp; 4,878 &amp; 1.6 &amp; 11 &amp; 53.5 &amp; 336 &amp; 2582 \\
+VLM-3R / Room size &amp; 2,040 &amp; 0.8 &amp; 6.6 &amp; 16.8 &amp; 38.2 &amp; 324.1 \\
+VSI-590K / Absolute direction &amp; 3,277 &amp; 0 &amp; 25 &amp; 190 &amp; 335 &amp; 357 \\
+\bottomrule
+\end{tabular}</pre></details></div>
+
+<h2>Question length</h2>
+<p class="note">Words in the question line (template preamble and options excluded).</p>
+<div class="card"><div class="tw"><table><thead><tr><th class="">Source</th><th class="n">Rows</th><th class="n">Mean words</th><th class="n">Median</th><th class="n">P90</th><th class="n">Max</th></tr></thead><tbody><tr><td class="">VSI-590K</td><td class="n">116,214</td><td class="n">18.3</td><td class="n">17</td><td class="n">28</td><td class="n">36</td></tr><tr><td class="">VLM-3R</td><td class="n">73,786</td><td class="n">21.2</td><td class="n">21</td><td class="n">24</td><td class="n">70</td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrrrrr}
+\toprule
+Source &amp; Rows &amp; Mean words &amp; Median &amp; P90 &amp; Max \\
+\midrule
+VSI-590K &amp; 116,214 &amp; 18.3 &amp; 17 &amp; 28 &amp; 36 \\
+VLM-3R &amp; 73,786 &amp; 21.2 &amp; 21 &amp; 24 &amp; 70 \\
+\bottomrule
+\end{tabular}</pre></details></div>
+
+<h2>Benchmark leakage check</h2>
+<div class="card"><p style="margin:0">VSI-Bench scenes in the mix: <span class="ok">0</span>
+ of 288 · ReVSI clips: <span class="ok">0</span> of 380
+ · audited-out scenes: <span class="ok">0</span> of 18
+ — ✓ no overlap</p></div>
+<p class="note" style="margin-top:14px">Scenes removed by the orientation / pose audit:</p>
+<div class="card"><div class="tw"><table><thead><tr><th class="">Scene</th><th class="n">Rows removed</th><th class="n">Reason</th></tr></thead><tbody><tr><td class="">scannetppv2/09d6e808b4</td><td class="n">125</td><td class="n">upside down</td></tr><tr><td class="">scannetppv2/0f69aefe3d</td><td class="n">68</td><td class="n">upside down</td></tr><tr><td class="">scannetppv2/6ef2ac745a</td><td class="n">89</td><td class="n">upside down</td></tr><tr><td class="">scannetppv2/1b379f1114</td><td class="n">157</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/1cbb105c6a</td><td class="n">119</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/2c7c10379b</td><td class="n">166</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/46638cfd0f</td><td class="n">136</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/898a7dfd0c</td><td class="n">107</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/aa852f7871</td><td class="n">159</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/d27235711b</td><td class="n">166</td><td class="n">sideways</td></tr><tr><td class="">scannetppv2/eea4ad9c04</td><td class="n">144</td><td class="n">sideways</td></tr><tr><td class="">arkitscenes/41254810</td><td class="n">33</td><td class="n">sideways (41/64 frames)</td></tr><tr><td class="">scannetppv2/7dab70c8c8</td><td class="n">160</td><td class="n">broken pose</td></tr><tr><td class="">scannetppv2/928c9da20c</td><td class="n">166</td><td class="n">broken pose (180 deg flip)</td></tr><tr><td class="">scannetppv2/120acffd90</td><td class="n">46</td><td class="n">broken pose (286 m jump)</td></tr><tr><td class="">scannetppv2/46001f434d</td><td class="n">50</td><td class="n">broken pose (71 m jump)</td></tr><tr><td class="">scannetppv2/ab4f373966</td><td class="n">108</td><td class="n">broken pose (49 m jump)</td></tr><tr><td class="">scannetppv2/cc0aa81452</td><td class="n">110</td><td class="n">broken pose (41 m jump)</td></tr></tbody></table></div><details><summary>LaTeX (booktabs)</summary><pre class="tex">\begin{tabular}{lrr}
+\toprule
+Scene &amp; Rows removed &amp; Reason \\
+\midrule
+scannetppv2/09d6e808b4 &amp; 125 &amp; upside down \\
+scannetppv2/0f69aefe3d &amp; 68 &amp; upside down \\
+scannetppv2/6ef2ac745a &amp; 89 &amp; upside down \\
+scannetppv2/1b379f1114 &amp; 157 &amp; sideways \\
+scannetppv2/1cbb105c6a &amp; 119 &amp; sideways \\
+scannetppv2/2c7c10379b &amp; 166 &amp; sideways \\
+scannetppv2/46638cfd0f &amp; 136 &amp; sideways \\
+scannetppv2/898a7dfd0c &amp; 107 &amp; sideways \\
+scannetppv2/aa852f7871 &amp; 159 &amp; sideways \\
+scannetppv2/d27235711b &amp; 166 &amp; sideways \\
+scannetppv2/eea4ad9c04 &amp; 144 &amp; sideways \\
+arkitscenes/41254810 &amp; 33 &amp; sideways (41/64 frames) \\
+scannetppv2/7dab70c8c8 &amp; 160 &amp; broken pose \\
+scannetppv2/928c9da20c &amp; 166 &amp; broken pose (180 deg flip) \\
+scannetppv2/120acffd90 &amp; 46 &amp; broken pose (286 m jump) \\
+scannetppv2/46001f434d &amp; 50 &amp; broken pose (71 m jump) \\
+scannetppv2/ab4f373966 &amp; 108 &amp; broken pose (49 m jump) \\
+scannetppv2/cc0aa81452 &amp; 110 &amp; broken pose (41 m jump) \\
+\bottomrule
+\end{tabular}</pre></details></div>
+
+<h2>Examples</h2>
+<p class="note">One random row per (type, source), seed 0.</p>
+<div class="exs"><div class="ex"><div class="exh">Relative direction <span>VSI-590K · scannetppv2/a8f7f66985</span></div><pre>If I position myself at the tv, aiming toward the trash can, is the table to my left, right, or behind me? Behind signifies at least a 135-degree rotation is required.
+Options:
+A. right
+B. back
+C. left
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>C</b></div></div><div class="ex"><div class="exh">Relative direction <span>VLM-3R · scannetppv2/736536044</span></div><pre>If I am standing by the door and facing the refrigerator, is the ceiling lamp to my front-left, front-right, back-left, or back-right?
+The directions refer to the quadrants of a Cartesian plane (if I am standing at the origin and facing along the positive y-axis).
+Options:
+A. back-right
+B. back-left
+C. front-right
+D. front-left
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>D</b></div></div><div class="ex"><div class="exh">Relative distance <span>VSI-590K · scannet/scene0341_00</span></div><pre>Measure from the closest point: among these options (keyboard, window, door, chair), which is nearest to the trash bin? Use the closest instance if multiples occur.
+Options:
+A. keyboard
+B. window
+C. door
+D. chair
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>C</b></div></div><div class="ex"><div class="exh">Relative distance <span>VLM-3R · scannetppv2/f8eac0ad24</span></div><pre>Measuring from the closest point of each object, which of these objects (ceiling lamp, window, door, bookshelf) is the closest to the smoke detector?
+If there are multiple instances of an object category, measure to the closest.
+Options:
+A. ceiling lamp
+B. window
+C. door
+D. bookshelf
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>A</b></div></div><div class="ex"><div class="exh">Absolute distance <span>VSI-590K · arkitscenes/42897951</span></div><pre>Express in meters how far apart the closest points of the table and the toilet are.
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>0.4</b></div></div><div class="ex"><div class="exh">Absolute distance <span>VLM-3R · scannetppv2/25927bb04c</span></div><pre>Measuring from the closest point of each object, what is the direct distance between the book and the bottle (in meters)?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>1.1</b></div></div><div class="ex"><div class="exh">Object size <span>VSI-590K · arkitscenes/43828463</span></div><pre>What&#x27;s the longest side dimension of the table, stated in inches?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>28.0</b></div></div><div class="ex"><div class="exh">Object size <span>VLM-3R · scannetppv2/9471b8d485</span></div><pre>What is the length of the longest dimension (length, width, or height) of the blinds, measured in centimeters?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>198</b></div></div><div class="ex"><div class="exh">Counting <span>VSI-590K · scannet/scene0477_01</span></div><pre>Do you know how many table(s) are inside this room?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>2</b></div></div><div class="ex"><div class="exh">Counting <span>VLM-3R · scannet/scene0200_02</span></div><pre>How many window(s) are in this room?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>2</b></div></div><div class="ex"><div class="exh">Appearance order <span>VSI-590K · scannetppv2/f311090fa6</span></div><pre>What is the initial sequence of appearances for these video categories: table, pillow, shoes, bed?
+Options:
+A. table, bed, pillow, shoes
+B. table, pillow, shoes, bed
+C. bed, shoes, table, pillow
+D. pillow, table, shoes, bed
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>A</b></div></div><div class="ex"><div class="exh">Room size <span>VSI-590K · scannetppv2/f8d5147d1d</span></div><pre>Could you provide the room dimensions in square feet? If multiple rooms are displayed, please estimate their total size.
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>217</b></div></div><div class="ex"><div class="exh">Room size <span>VLM-3R · scannetppv2/c085ff3df4</span></div><pre>What is the size of this room (in square meters)? 
+If multiple rooms are shown, estimate the size of the combined space.
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>64.9</b></div></div><div class="ex"><div class="exh">Relative size <span>VSI-590K · arkitscenes/43649755</span></div><pre>Is the longest edge of the toilet or the bathtub the shorter?
+Options:
+A. toilet
+B. bathtub
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>A</b></div></div><div class="ex"><div class="exh">Route planning <span>VLM-3R · scannet/scene0205_02</span></div><pre>You are a robot beginning at the doorframe facing the backpack. You want to navigate to the paper cutter. You will perform the following actions (Note: for each [please fill in], choose either &#x27;turn back,&#x27; &#x27;turn left,&#x27; or &#x27;turn right.&#x27;):  1. [please fill in] 2. Go forward until the paper cutter. You have reached the final destination.
+Options:
+A. Turn Left
+B. Turn Back
+C. Turn Right
+Answer with the option&#x27;s letter from the given choices directly.</pre><div class="ans">Answer: <b>B</b></div></div><div class="ex"><div class="exh">Absolute direction <span>VSI-590K · scannetppv2/e93cd5230e</span></div><pre>Standing at the heater, facing the blanket, how many degrees do I have to rotate in clockwise to face the computer mouse exactly?
+Please answer the question using a single word or phrase.</pre><div class="ans">Answer: <b>318</b></div></div></div>
+</main></body></html>
